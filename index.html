@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cumplido — Software de control operativo y financiero para restaurantes. Checklists por turno, registros APPCC y dashboard financiero.">
+  <meta property="og:title" content="Cumplido — Control operativo para restaurantes">
+  <meta property="og:description" content="Checklists por turno, registros APPCC y dashboard financiero para restaurantes.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cumplido.app">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230D7C66'/><polyline points='8 17 13 22 24 10' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <title>Cumplido — Control operativo para restaurantes</title>
+
+<style>
+  :root {
+    --c-primary: #0D7C66;
+    --c-primary-hover: #0B9A7E;
+    --c-accent: #D4922A;
+    --c-accent-hover: #E5A33C;
+    --c-bg: #F5F3F0;
+    --c-bg-alt: #EBE8E3;
+    --c-surface: #FFFFFF;
+    --c-text: #1B2228;
+    --c-text-2: #5D6D75;
+    --c-text-3: #94A1A8;
+    --c-border: rgba(27,34,40,0.10);
+    --f-display: Georgia, "Times New Roman", "Iowan Old Style", "Palatino Linotype", serif;
+    --f-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --max-w: 1100px;
+    --r: 2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --c-bg: #0B1317;
+      --c-bg-alt: #0F1A20;
+      --c-surface: #152028;
+      --c-text: #DFE4E6;
+      --c-text-2: #8899A2;
+      --c-text-3: #5A6B73;
+      --c-border: rgba(223,228,230,0.07);
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--f-body);
+    color: var(--c-text);
+    background: var(--c-bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1rem 0;
+    background: rgba(11,19,23,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .nav-logo {
+    font-family: var(--f-body);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #E8EAEB;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .nav-logo .check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    background: var(--c-primary);
+    border-radius: var(--r);
+  }
+  .nav-logo .check svg {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.875rem;
+    color: #8899A2;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #DFE4E6; }
+  .nav-cta {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0B1317 !important;
+    background: var(--c-accent);
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--r);
+    text-decoration: none;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .nav-cta:hover { background: var(--c-accent-hover); color: #0B1317 !important; }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 47px,
+        rgba(13,124,102,0.045) 47px,
+        rgba(13,124,102,0.045) 48px
+      ),
+      linear-gradient(175deg, #0B1317 0%, #0E1C24 60%, #0D2320 100%);
+    padding: 10rem 0 6rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(13,124,102,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-primary);
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    font-size: clamp(2.75rem, 6vw, 4.25rem);
+    line-height: 1.08;
+    color: #EDF0F1;
+    margin-bottom: 1.5rem;
+    text-wrap: balance;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--c-primary);
+  }
+  .hero-sub {
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: #7F929B;
+    max-width: 560px;
+    margin-bottom: 2.5rem;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--f-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #0B1317;
+    background: var(--c-accent);
+    padding: 0.75rem 1.75rem;
+    border-radius: var(--r);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { background: var(--c-accent-hover); transform: translateY(-1px); }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--f-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #8899A2;
+    background: transparent;
+    padding: 0.75rem 1.75rem;
+    border: 1px solid rgba(136,153,162,0.25);
+    border-radius: var(--r);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-secondary:hover { color: #DFE4E6; border-color: rgba(136,153,162,0.5); }
+
+  /* ── TRUST BAR ── */
+  .trust {
+    background: var(--c-bg-alt);
+    border-top: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-border);
+    padding: 2rem 0;
+  }
+  .trust .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--c-text-2);
+    white-space: nowrap;
+  }
+  .trust-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--c-primary);
+    flex-shrink: 0;
+  }
+
+  /* ── SECTIONS ── */
+  .section { padding: 5rem 0; }
+  .section-lg { padding: 6rem 0; }
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-primary);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--f-display);
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.15;
+    color: var(--c-text);
+    margin-bottom: 1rem;
+    text-wrap: balance;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+  .section-sub {
+    font-size: 1.0625rem;
+    color: var(--c-text-2);
+    max-width: 560px;
+    line-height: 1.6;
+  }
+
+  /* ── PRODUCTS ── */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 3rem;
+  }
+  @media (max-width: 900px) {
+    .products-grid { grid-template-columns: 1fr; gap: 1rem; }
+  }
+  .product-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .product-card:hover {
+    border-color: rgba(13,124,102,0.25);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .product-card.featured { border-color: var(--c-primary); }
+  .product-card.featured::before {
+    content: "Recomendado";
+    position: absolute;
+    top: -0.625rem;
+    left: 1.5rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #0B1317;
+    background: var(--c-primary);
+    padding: 0.2rem 0.625rem;
+    border-radius: var(--r);
+  }
+  .product-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(13,124,102,0.08);
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    color: var(--c-primary);
+  }
+  .product-name {
+    font-family: var(--f-display);
+    font-size: 1.375rem;
+    color: var(--c-text);
+    margin-bottom: 0.375rem;
+    font-weight: 400;
+  }
+  .product-type {
+    font-size: 0.8125rem;
+    color: var(--c-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .product-desc {
+    font-size: 0.9375rem;
+    color: var(--c-text-2);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+  .product-features {
+    list-style: none;
+    margin-bottom: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .product-features li {
+    font-size: 0.8125rem;
+    color: var(--c-text-2);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    line-height: 1.45;
+  }
+  .product-features li::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    background: var(--c-primary);
+    border-radius: 1px;
+    flex-shrink: 0;
+    margin-top: 0.375rem;
+  }
+  .product-card .btn-primary {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.875rem;
+    padding: 0.625rem 1.5rem;
+  }
+  .product-card .btn-outline {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.625rem 1.5rem;
+    background: transparent;
+    color: var(--c-text);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r);
+    text-decoration: none;
+    cursor: pointer;
+    font-family: var(--f-body);
+    transition: border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+  }
+  .product-card .btn-outline:hover {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+  }
+
+  /* ── FEATURE SECTIONS ── */
+  .feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    padding: 4rem 0;
+  }
+  .feature-row + .feature-row { border-top: 1px solid var(--c-border); }
+  .feature-row.reverse .feature-text { order: 2; }
+  .feature-row.reverse .feature-visual { order: 1; }
+  @media (max-width: 800px) {
+    .feature-row { grid-template-columns: 1fr; gap: 2rem; }
+    .feature-row.reverse .feature-text { order: 1; }
+    .feature-row.reverse .feature-visual { order: 2; }
+  }
+  .feature-text h3 {
+    font-family: var(--f-display);
+    font-size: 1.625rem;
+    color: var(--c-text);
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .feature-text p {
+    font-size: 0.9375rem;
+    color: var(--c-text-2);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+  }
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .feature-list li {
+    font-size: 0.875rem;
+    color: var(--c-text);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .feature-list li svg {
+    width: 1rem;
+    height: 1rem;
+    color: var(--c-primary);
+    flex-shrink: 0;
+  }
+
+  /* ── MOCKUPS ── */
+  .mockup {
+    background: #0B1317;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 1.25rem;
+    font-family: var(--f-body);
+    overflow: hidden;
+  }
+  .mockup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .mockup-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8899A2;
+    letter-spacing: 0.04em;
+  }
+  .mockup-badge {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--c-primary);
+    background: rgba(13,124,102,0.12);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--r);
+    letter-spacing: 0.04em;
+  }
+  .mock-task {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .mock-task:last-child { border-bottom: none; }
+  .mock-check {
+    width: 1rem;
+    height: 1rem;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mock-check.done { background: var(--c-primary); border-color: var(--c-primary); }
+  .mock-check.done svg { display: block; }
+  .mock-check svg { display: none; width: 0.6rem; height: 0.6rem; color: #fff; }
+  .mock-task-text { font-size: 0.75rem; color: #8899A2; flex-grow: 1; }
+  .mock-task.done .mock-task-text { color: #5A6B73; text-decoration: line-through; }
+  .mock-progress {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .mock-progress-bar {
+    flex-grow: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .mock-progress-fill { height: 100%; background: var(--c-primary); border-radius: 2px; }
+  .mock-progress-label {
+    font-size: 0.6875rem;
+    color: var(--c-primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .mock-kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .mock-kpi { background: rgba(255,255,255,0.03); border-radius: 3px; padding: 0.75rem; }
+  .mock-kpi-label {
+    font-size: 0.625rem;
+    color: #5A6B73;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+  }
+  .mock-kpi-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #DFE4E6;
+    font-variant-numeric: tabular-nums;
+  }
+  .mock-kpi-change { font-size: 0.625rem; font-weight: 600; color: var(--c-primary); margin-top: 0.15rem; }
+  .mock-kpi-change.neg { color: #D45B5B; }
+  .mock-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.375rem;
+    height: 60px;
+    padding-top: 0.5rem;
+  }
+  .mock-bar {
+    flex: 1;
+    background: rgba(13,124,102,0.25);
+    border-radius: 2px 2px 0 0;
+    min-height: 4px;
+  }
+  .mock-bar.active { background: var(--c-primary); }
+  .mock-chart-labels { display: flex; gap: 0.375rem; margin-top: 0.375rem; }
+  .mock-chart-labels span {
+    flex: 1;
+    font-size: 0.5625rem;
+    color: #5A6B73;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    background: #0B1317;
+    padding: 5rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: "";
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(13,124,102,0.1) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cta-content { position: relative; z-index: 1; }
+  .cta-section h2 {
+    font-family: var(--f-display);
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    color: #EDF0F1;
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  .cta-section p {
+    font-size: 1.0625rem;
+    color: #7F929B;
+    margin-bottom: 2rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+  .cta-email-row {
+    display: flex;
+    gap: 0.625rem;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .cta-input {
+    flex-grow: 1;
+    font-family: var(--f-body);
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--r);
+    color: #DFE4E6;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cta-input::placeholder { color: #5A6B73; }
+  .cta-input:focus { border-color: var(--c-primary); }
+  .cta-email-row .btn-primary { flex-shrink: 0; font-size: 0.875rem; }
+  @media (max-width: 480px) {
+    .cta-email-row { flex-direction: column; }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--c-bg-alt);
+    border-top: 1px solid var(--c-border);
+    padding: 2.5rem 0;
+  }
+  .footer .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-brand { font-size: 0.875rem; font-weight: 600; color: var(--c-text); }
+  .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+  .footer-links a {
+    font-size: 0.8125rem;
+    color: var(--c-text-2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--c-text); }
+  .footer-copy {
+    font-size: 0.75rem;
+    color: var(--c-text-3);
+    width: 100%;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--c-border);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <a href="#" class="nav-logo">
+      <span class="check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2.5 6.5 5 9 9.5 3.5" stroke="#fff"/></svg></span>
+      cumplido
+    </a>
+    <ul class="nav-links">
+      <li><a href="#productos">Productos</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="#contacto" class="nav-cta">Solicitar demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Software para hosteleria</p>
+      <h1>Cada turno,<br><em>cumplido.</em></h1>
+      <p class="hero-sub">Control operativo y visibilidad financiera para restaurantes. Tareas de equipo, registros APPCC y datos de negocio &mdash; sin papel, sin excusas.</p>
+      <div class="hero-actions">
+        <a href="#contacto" class="btn-primary">Solicitar demo</a>
+        <a href="#productos" class="btn-secondary">Ver productos &darr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<section class="trust">
+  <div class="wrap">
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23.83-4.82L3 7.27l4.91-1.01L10 2z"/></svg>
+      Disenado por profesionales de hosteleria
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M3 8h14"/></svg>
+      Cumplimiento APPCC integrado
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v16M2 10h16"/><circle cx="10" cy="10" r="7"/></svg>
+      Acceso desde cualquier dispositivo
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section section-lg" id="productos">
+  <div class="wrap">
+    <p class="section-label">Productos</p>
+    <h2 class="section-title">Tres soluciones, un objetivo: control total.</h2>
+    <p class="section-sub">Elige lo que necesitas hoy. Escala cuando crezcas.</p>
+
+    <div class="products-grid">
+      <div class="product-card">
+        <div class="product-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="2" width="14" height="16" rx="1.5"/><path d="M7 7h6M7 10.5h6M7 14h3"/><path d="M3 6h2"/><path d="M3 9.5h2"/><path d="M3 13h2"/></svg>
+        </div>
+        <h3 class="product-name">Checklists</h3>
+        <p class="product-type">Control operativo diario</p>
+        <p class="product-desc">Tu equipo marca cada tarea cumplida. Tu verificas desde cualquier lugar. Checklists por turno, registros de limpieza APPCC y control de temperaturas.</p>
+        <ul class="product-features">
+          <li>Checklists por turno y area</li>
+          <li>Registros APPCC de limpieza</li>
+          <li>Control de temperaturas con alertas</li>
+          <li>Validacion de supervisor</li>
+          <li>Historial completo y exportacion</li>
+        </ul>
+        <a href="#contacto" class="btn-outline">Solicitar demo</a>
+      </div>
+
+      <div class="product-card">
+        <div class="product-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="16" height="14" rx="1.5"/><path d="M6 13V9M10 13V7M14 13V10"/></svg>
+        </div>
+        <h3 class="product-name">Dashboard</h3>
+        <p class="product-type">Visibilidad financiera</p>
+        <p class="product-desc">Ventas, costes, inventario y nominas en un panel claro. Compara con tu forecast, detecta desviaciones y toma decisiones con datos.</p>
+        <ul class="product-features">
+          <li>Ventas por sala y periodo</li>
+          <li>Forecast vs. realidad</li>
+          <li>Costes y nominas por area</li>
+          <li>Inventario por categoria</li>
+          <li>Comparativa interanual</li>
+        </ul>
+        <a href="#contacto" class="btn-outline">Solicitar demo</a>
+      </div>
+
+      <div class="product-card featured">
+        <div class="product-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
+        </div>
+        <h3 class="product-name">Suite</h3>
+        <p class="product-type">Operaciones + finanzas</p>
+        <p class="product-desc">La vision completa de tu restaurante. Combina el control operativo diario con la visibilidad financiera en una plataforma integrada.</p>
+        <ul class="product-features">
+          <li>Todo de Checklists + Dashboard</li>
+          <li>Datos cruzados entre modulos</li>
+          <li>Configuracion personalizada</li>
+          <li>Soporte prioritario</li>
+          <li>Onboarding asistido</li>
+        </ul>
+        <a href="#contacto" class="btn-primary">Solicitar demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="funcionalidades" style="border-top: 1px solid var(--c-border);">
+  <div class="wrap">
+    <p class="section-label">Funcionalidades</p>
+    <h2 class="section-title">Lo que tu equipo usa cada dia.</h2>
+
+    <div class="feature-row">
+      <div class="feature-text">
+        <h3>Checklists operativos por turno</h3>
+        <p>Cada empleado abre su turno y completa las tareas asignadas a su area: apertura, entreturno y cierre. El supervisor valida el dia sin moverse del sitio.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Tres turnos: apertura, entreturno, cierre</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Tareas editables por area y seccion</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Entradas tardias con aprobacion</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Calendario mensual de cumplimiento</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mockup">
+          <div class="mockup-header">
+            <span class="mockup-title">Apertura &mdash; Sala</span>
+            <span class="mockup-badge">6 / 8</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Encender luces y climatizacion</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Verificar reservas del dia</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Montar mesas segun plano</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Reponer servilletas y cubiertos</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Revisar carta de vinos</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text">Briefing de servicio con equipo</span>
+          </div>
+          <div class="mock-task">
+            <span class="mock-check"></span>
+            <span class="mock-task-text">Comprobar musica ambiental</span>
+          </div>
+          <div class="mock-task">
+            <span class="mock-check"></span>
+            <span class="mock-task-text">Verificar limpieza de banos</span>
+          </div>
+          <div class="mock-progress">
+            <div class="mock-progress-bar"><div class="mock-progress-fill" style="width:75%"></div></div>
+            <span class="mock-progress-label">75%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-text">
+        <h3>Registros APPCC digitales</h3>
+        <p>Limpieza por zonas con frecuencias configurables y control de temperaturas con alertas automaticas cuando un valor esta fuera de rango. Todo registrado, todo trazable.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Limpieza diaria, semanal, mensual, anual</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Temperaturas manana y tarde</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Alertas de valores fuera de rango</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Exportacion PDF para inspecciones</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mockup">
+          <div class="mockup-header">
+            <span class="mockup-title">Temperaturas &mdash; Cocina</span>
+            <span class="mockup-badge">Manana</span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text" style="display:flex;justify-content:space-between;width:100%">Camara frigorifica 1 <span style="color:var(--c-primary);font-weight:600;font-variant-numeric:tabular-nums">3.2 &deg;C</span></span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text" style="display:flex;justify-content:space-between;width:100%">Camara frigorifica 2 <span style="color:var(--c-primary);font-weight:600;font-variant-numeric:tabular-nums">4.1 &deg;C</span></span>
+          </div>
+          <div class="mock-task done">
+            <span class="mock-check done"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>
+            <span class="mock-task-text" style="display:flex;justify-content:space-between;width:100%">Congelador <span style="color:var(--c-primary);font-weight:600;font-variant-numeric:tabular-nums">-18.5 &deg;C</span></span>
+          </div>
+          <div class="mock-task">
+            <span class="mock-check" style="border-color:#D45B5B"></span>
+            <span class="mock-task-text" style="display:flex;justify-content:space-between;width:100%">Vitrina fria <span style="color:#D45B5B;font-weight:600;font-variant-numeric:tabular-nums">8.7 &deg;C &uarr;</span></span>
+          </div>
+          <div style="margin-top:0.75rem;padding:0.5rem 0.625rem;background:rgba(212,91,91,0.08);border:1px solid rgba(212,91,91,0.15);border-radius:2px;font-size:0.6875rem;color:#D45B5B;">
+            Alerta: Vitrina fria fuera de rango (max. 7 &deg;C)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-text">
+        <h3>Dashboard financiero en tiempo real</h3>
+        <p>Sube tus datos desde Excel y visualiza ventas, costes e inventario al instante. Compara con tu forecast y detecta desviaciones antes de que se conviertan en problemas.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Importacion directa desde Excel</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Graficos interactivos por periodo</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Desglose por sala y categoria</li>
+          <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>Comparativa ano anterior</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mockup">
+          <div class="mockup-header">
+            <span class="mockup-title">Ventas &mdash; Junio 2026</span>
+            <span class="mockup-badge">+12% vs forecast</span>
+          </div>
+          <div class="mock-kpi-row">
+            <div class="mock-kpi">
+              <div class="mock-kpi-label">Ventas</div>
+              <div class="mock-kpi-value">&euro;47.2K</div>
+              <div class="mock-kpi-change">+8.3% vs. 2025</div>
+            </div>
+            <div class="mock-kpi">
+              <div class="mock-kpi-label">Ticket medio</div>
+              <div class="mock-kpi-value">&euro;38.50</div>
+              <div class="mock-kpi-change neg">&minus;2.1% vs. 2025</div>
+            </div>
+          </div>
+          <div class="mock-chart">
+            <div class="mock-bar" style="height:45%"></div>
+            <div class="mock-bar" style="height:62%"></div>
+            <div class="mock-bar" style="height:38%"></div>
+            <div class="mock-bar" style="height:71%"></div>
+            <div class="mock-bar" style="height:55%"></div>
+            <div class="mock-bar active" style="height:85%"></div>
+          </div>
+          <div class="mock-chart-labels">
+            <span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span>May</span><span>Jun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contacto">
+  <div class="wrap cta-content">
+    <h2>Deja de adivinar.<br>Empieza a controlar.</h2>
+    <p>Solicita una demo y te mostramos como Cumplido se adapta a la operacion de tu restaurante.</p>
+    <div class="cta-email-row">
+      <input type="email" class="cta-input" placeholder="tu@restaurante.com" aria-label="Email de contacto">
+      <button class="btn-primary" type="button">Solicitar demo</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap">
+    <span class="footer-brand">cumplido.app</span>
+    <ul class="footer-links">
+      <li><a href="#productos">Productos</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <p class="footer-copy">&copy; 2026 Cumplido. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+</body>
+</html>
