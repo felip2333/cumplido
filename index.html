@@ -14,6 +14,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Google Analytics 4 — replace G-XXXXXXXXXX with your Measurement ID -->
+  <!--
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  -->
+
+  <!-- Microsoft Clarity — replace XXXXXXXXXX with your Clarity Project ID -->
+  <!--
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window,document,"clarity","script","XXXXXXXXXX");
+  </script>
+  -->
+
 <style>
   :root {
     --c-primary: #0D7C66;
@@ -61,6 +82,37 @@
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes rotateWord {
+    0%, 20% { opacity: 1; transform: translateY(0); }
+    25%, 30% { opacity: 0; transform: translateY(-20px); }
+    35% { opacity: 0; transform: translateY(20px); }
+    40%, 60% { opacity: 1; transform: translateY(0); }
+    65%, 70% { opacity: 0; transform: translateY(-20px); }
+    75% { opacity: 0; transform: translateY(20px); }
+    80%, 100% { opacity: 1; transform: translateY(0); }
+  }
+  .rotating-words {
+    display: block;
+    position: relative;
+    height: 1.3em;
+    overflow: hidden;
+  }
+  .rotating-words span {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: translateY(30px);
+    white-space: nowrap;
+  }
+  .rotating-words span.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
   }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -182,7 +234,7 @@
 
   /* ── HERO ── */
   .hero {
-    padding: 7rem 0 2.5rem;
+    padding: 5rem 0 1.5rem;
     position: relative;
     overflow: hidden;
   }
@@ -208,15 +260,11 @@
   .hero .wrap {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: 1fr 1.15fr;
-    gap: 2.5rem;
-    align-items: start;
+    text-align: center;
   }
-  @media (max-width: 900px) {
-    .hero .wrap { grid-template-columns: 1fr; text-align: center; }
-    .hero-content { order: 1; }
-    .hero-visual { order: 2; }
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto 2rem;
   }
   .hero-badge {
     display: inline-flex;
@@ -240,37 +288,41 @@
     border-radius: 50%;
     animation: pulse-glow 2s ease-in-out infinite;
   }
-  .hero h1 {
-    font-size: clamp(2rem, 4.5vw, 3rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    margin-bottom: 1rem;
+  .hero-slogan {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
     color: #fff;
+    margin-bottom: 1rem;
   }
-  .hero h1 .highlight {
+  .hero-rotating-line {
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--c-text-2);
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .hero-slogan .highlight,
+  .hero-rotating-line .highlight {
     background: linear-gradient(135deg, var(--c-primary-light), var(--c-primary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .hero-sub {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.65;
     color: var(--c-text-2);
-    max-width: 440px;
-    margin-bottom: 1.5rem;
-  }
-  @media (max-width: 900px) {
-    .hero-sub { margin-left: auto; margin-right: auto; }
+    max-width: 540px;
+    margin: 0 auto 1.5rem;
   }
   .hero-actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
-  }
-  @media (max-width: 900px) {
-    .hero-actions { justify-content: center; }
+    justify-content: center;
   }
 
   /* ── BUTTONS ── */
@@ -332,11 +384,15 @@
   }
 
   /* ── HERO DASHBOARD MOCKUP ── */
+  .hero-visual {
+    max-width: 960px;
+    margin: 0 auto;
+  }
   .hero-dashboard {
     background: var(--c-surface);
     border: 1px solid var(--c-border-2);
     border-radius: 20px;
-    padding: 1.25rem;
+    padding: 1.5rem;
     box-shadow: var(--shadow-lg), 0 0 60px rgba(13,124,102,0.08);
     animation: fadeUp 0.8s ease-out 0.3s both;
     position: relative;
@@ -606,11 +662,11 @@
   .trust-icon svg { width: 1rem; height: 1rem; color: var(--c-primary-light); }
 
   /* ── SECTIONS ── */
-  .section { padding: 5rem 0; }
+  .section { padding: 3.5rem 0; }
   .section-header {
     text-align: center;
     max-width: 600px;
-    margin: 0 auto 3.5rem;
+    margin: 0 auto 2.5rem;
   }
   .section-badge {
     display: inline-flex;
@@ -723,6 +779,20 @@
     color: var(--c-primary-light);
     font-weight: 600;
     margin-bottom: 1rem;
+  }
+  .product-price {
+    margin-bottom: 1rem;
+  }
+  .price-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+  }
+  .price-period {
+    font-size: 0.875rem;
+    color: var(--c-text-3);
+    font-weight: 500;
   }
   .product-desc {
     font-size: 0.9rem;
@@ -932,7 +1002,7 @@
 
   /* ── CTA SECTION ── */
   .cta-section {
-    padding: 6rem 0;
+    padding: 4rem 0;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -1089,6 +1159,178 @@
     animation: pulse-glow 1.5s ease-in-out infinite;
   }
 
+  /* ── SOCIAL PROOF ── */
+  .social-proof {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .social-proof .section-header { margin-bottom: 2.5rem; }
+  .proof-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 768px) { .proof-stats { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 400px) { .proof-stats { grid-template-columns: 1fr; } }
+  .proof-stat {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-2);
+    border-radius: var(--r);
+  }
+  .proof-stat-value {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--c-primary-light), var(--c-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .proof-stat-label {
+    font-size: 0.8125rem;
+    color: var(--c-text-2);
+    margin-top: 0.25rem;
+  }
+  .proof-quotes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  @media (max-width: 600px) { .proof-quotes { grid-template-columns: 1fr; } }
+  .proof-quote {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-2);
+    border-radius: var(--r);
+    padding: 2rem;
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .proof-quote::before {
+    content: "\201C";
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--c-primary);
+    opacity: 0.4;
+    position: absolute;
+    top: 0.75rem;
+    left: 1.25rem;
+  }
+  .proof-quote p {
+    font-size: 1rem;
+    color: var(--c-text);
+    line-height: 1.7;
+    font-style: italic;
+    padding-left: 1.5rem;
+  }
+  .proof-quote-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-left: 1.5rem;
+  }
+  .proof-quote-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--c-primary), var(--c-primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .proof-quote-name { font-size: 0.8125rem; font-weight: 600; color: var(--c-text); }
+  .proof-quote-role { font-size: 0.75rem; color: var(--c-text-3); }
+
+  /* ── COMPARISON ── */
+  .comparison {
+    padding: 5rem 0;
+    border-top: 1px solid var(--c-border);
+  }
+  .comparison-table {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 0;
+    max-width: 700px;
+    margin: 0 auto;
+    border: 1px solid var(--c-border-2);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+  @media (max-width: 600px) {
+    .comparison-table { font-size: 0.85em; }
+  }
+  .comp-header {
+    background: var(--c-surface-2);
+    padding: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--c-text-2);
+    border-bottom: 1px solid var(--c-border);
+    text-align: center;
+  }
+  .comp-header:first-child { text-align: left; }
+  .comp-header.highlight-col {
+    color: var(--c-primary-light);
+    background: rgba(13,124,102,0.06);
+  }
+  .comp-row {
+    display: contents;
+  }
+  .comp-cell {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--c-text-2);
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comp-cell:first-child {
+    justify-content: flex-start;
+    color: var(--c-text);
+    font-weight: 500;
+  }
+  .comp-cell.highlight-col {
+    background: rgba(13,124,102,0.03);
+  }
+  .comp-cell .comp-yes {
+    color: var(--c-primary-light);
+    font-weight: 700;
+  }
+  .comp-cell .comp-no {
+    color: var(--c-text-3);
+  }
+
+  /* ── CTA BUTTONS ROW ── */
+  .cta-buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .btn-whatsapp {
+    color: #fff;
+    background: #25D366;
+    box-shadow: 0 0 20px rgba(37,211,102,0.2);
+  }
+  .btn-whatsapp:hover {
+    background: #20BD5A;
+    box-shadow: 0 0 28px rgba(37,211,102,0.35);
+    transform: translateY(-2px);
+  }
+
   /* ── ACCESSIBILITY ── */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -1116,7 +1358,7 @@
       <li><a href="#funcionalidades">Funcionalidades</a></li>
       <li><a href="#contacto">Contacto</a></li>
     </ul>
-    <a href="#contacto" class="nav-cta">Solicitar demo</a>
+    <a href="#contacto" class="nav-cta">Ver demo</a>
     <button class="nav-mobile-toggle" onclick="document.getElementById('nav-links').classList.toggle('open')" aria-label="Menu">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -1131,12 +1373,13 @@
     <div class="hero-content" style="animation: fadeUp 0.6s ease-out both;">
       <div class="hero-badge">
         <span class="hero-badge-dot"></span>
-        Software para hosteleria
+        Software para restaurantes
       </div>
-      <h1>Control total<br>de tu <span class="highlight">restaurante.</span></h1>
-      <p class="hero-sub">Operaciones, cumplimiento APPCC y finanzas en una plataforma. Tu equipo ejecuta, tu controlas &mdash; desde cualquier lugar.</p>
+      <h1 class="hero-slogan">Control total<br>de tu <span class="highlight">restaurante.</span></h1>
+      <div class="hero-rotating-line">Tus turnos<br><span class="rotating-words" id="rotating"><span class="highlight active">cumplidos.</span><span class="highlight">controlados.</span><span class="highlight">digitales.</span><span class="highlight">medibles.</span></span></div>
+      <p class="hero-sub">Checklists operativos, APPCC y dashboard financiero. Tu equipo ejecuta, tu controlas &mdash; desde cualquier lugar.</p>
       <div class="hero-actions">
-        <a href="#contacto" class="btn btn-primary btn-lg">Solicitar demo</a>
+        <a href="#contacto" class="btn btn-primary btn-lg">Ver demo gratuita</a>
         <a href="#productos" class="btn btn-ghost btn-lg">Ver productos</a>
       </div>
     </div>
@@ -1266,6 +1509,57 @@
   </div>
 </section>
 
+<!-- SOCIAL PROOF -->
+<section class="social-proof animate-on-scroll">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-badge">Resultados reales</div>
+      <h2 class="section-title">Gestion administrativa<br>visual, dinamica y sin complicaciones.</h2>
+      <p class="section-sub">Tu restaurante genera datos cada dia. Cumplido los convierte en decisiones.</p>
+    </div>
+    <div class="proof-stats">
+      <div class="proof-stat">
+        <div class="proof-stat-value">98%</div>
+        <div class="proof-stat-label">Tareas completadas a tiempo</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-value">2h</div>
+        <div class="proof-stat-label">Menos de gestion por turno</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-value">100%</div>
+        <div class="proof-stat-label">Trazabilidad APPCC digital</div>
+      </div>
+      <div class="proof-stat">
+        <div class="proof-stat-value">10s</div>
+        <div class="proof-stat-label">Para ver el estado de tu negocio</div>
+      </div>
+    </div>
+    <div class="proof-quotes">
+      <div class="proof-quote">
+        <p>Antes teniamos hojas de Excel, grupos de WhatsApp y post-its. Ahora abro Cumplido y se exactamente que se ha hecho y que falta.</p>
+        <div class="proof-quote-author">
+          <div class="proof-quote-avatar">JL</div>
+          <div>
+            <div class="proof-quote-name">Jose Luis</div>
+            <div class="proof-quote-role">Director de operaciones &mdash; Madrid</div>
+          </div>
+        </div>
+      </div>
+      <div class="proof-quote">
+        <p>El dashboard me ahorra reuniones. Veo las ventas, los costes y si el equipo ha cumplido todo sin tener que llamar a nadie.</p>
+        <div class="proof-quote-author">
+          <div class="proof-quote-avatar">MC</div>
+          <div>
+            <div class="proof-quote-name">Maria Carmen</div>
+            <div class="proof-quote-role">Propietaria &mdash; Barcelona</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PRODUCTS -->
 <section class="section" id="productos">
   <div class="wrap">
@@ -1282,6 +1576,7 @@
         </div>
         <h3 class="product-name">Checklists</h3>
         <p class="product-type">Control operativo diario</p>
+        <div class="product-price"><span class="price-amount">&euro;49</span><span class="price-period">/mes</span></div>
         <p class="product-desc">Tu equipo marca cada tarea cumplida. Tu verificas desde cualquier lugar. Checklists por turno, registros APPCC y control de temperaturas.</p>
         <ul class="product-features">
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Checklists por turno y area</li>
@@ -1290,7 +1585,7 @@
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Validacion de supervisor</li>
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Historial y exportacion</li>
         </ul>
-        <a href="#contacto" class="btn btn-outline-primary btn-md" style="width:100%;justify-content:center;">Solicitar demo</a>
+        <a href="#contacto" class="btn btn-outline-primary btn-md" style="width:100%;justify-content:center;">Ver demo</a>
       </div>
 
       <div class="product-card animate-on-scroll">
@@ -1299,6 +1594,7 @@
         </div>
         <h3 class="product-name">Dashboard</h3>
         <p class="product-type">Visibilidad financiera</p>
+        <div class="product-price"><span class="price-amount">&euro;69</span><span class="price-period">/mes</span></div>
         <p class="product-desc">Ventas, costes, inventario y nominas en un panel claro. Compara con tu forecast, detecta desviaciones y toma decisiones con datos.</p>
         <ul class="product-features">
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Ventas por sala y periodo</li>
@@ -1307,7 +1603,7 @@
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Inventario por categoria</li>
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Comparativa interanual</li>
         </ul>
-        <a href="#contacto" class="btn btn-outline-primary btn-md" style="width:100%;justify-content:center;">Solicitar demo</a>
+        <a href="#contacto" class="btn btn-outline-primary btn-md" style="width:100%;justify-content:center;">Ver demo</a>
       </div>
 
       <div class="product-card featured animate-on-scroll">
@@ -1317,6 +1613,7 @@
         </div>
         <h3 class="product-name">Suite</h3>
         <p class="product-type">Operaciones + Finanzas</p>
+        <div class="product-price"><span class="price-amount">&euro;99</span><span class="price-period">/mes</span></div>
         <p class="product-desc">La vision completa de tu restaurante. Combina el control operativo diario con la visibilidad financiera en una plataforma integrada.</p>
         <ul class="product-features">
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Todo de Checklists + Dashboard</li>
@@ -1325,7 +1622,7 @@
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Soporte prioritario</li>
           <li><span class="feat-check"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg></span>Onboarding asistido</li>
         </ul>
-        <a href="#contacto" class="btn btn-primary btn-md" style="width:100%;justify-content:center;">Solicitar demo</a>
+        <a href="#contacto" class="btn btn-primary btn-md" style="width:100%;justify-content:center;">Probar gratis</a>
       </div>
     </div>
   </div>
@@ -1445,18 +1742,71 @@
   </div>
 </section>
 
+<!-- COMPARISON -->
+<section class="comparison animate-on-scroll">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="section-badge">Por que cambiar</div>
+      <h2 class="section-title">Excel y WhatsApp vs. Cumplido</h2>
+      <p class="section-sub">Lo que haces hoy con 5 herramientas, hazlo con una.</p>
+    </div>
+    <div class="comparison-table">
+      <div class="comp-header"></div>
+      <div class="comp-header">Excel + WhatsApp</div>
+      <div class="comp-header highlight-col">Cumplido</div>
+
+      <div class="comp-row">
+        <div class="comp-cell">Checklists por turno</div>
+        <div class="comp-cell"><span class="comp-no">Manual / papel</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Automatico</span></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Registros APPCC</div>
+        <div class="comp-cell"><span class="comp-no">Carpetas fisicas</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Digital + alertas</span></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Ver datos financieros</div>
+        <div class="comp-cell"><span class="comp-no">Horas de Excel</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Dashboard al instante</span></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Saber si se hizo todo</div>
+        <div class="comp-cell"><span class="comp-no">Llamar / preguntar</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Tiempo real</span></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Acceso remoto</div>
+        <div class="comp-cell"><span class="comp-no">Solo en el local</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Cualquier lugar</span></div>
+      </div>
+      <div class="comp-row">
+        <div class="comp-cell">Historial trazable</div>
+        <div class="comp-cell"><span class="comp-no">Se pierde</span></div>
+        <div class="comp-cell highlight-col"><span class="comp-yes">&#10003; Guardado siempre</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-section" id="contacto">
   <div class="cta-glow"></div>
   <div class="wrap cta-content animate-on-scroll">
     <div class="section-badge" style="margin-bottom:1.5rem;">Empieza hoy</div>
     <h2>Deja de adivinar.<br>Empieza a controlar.</h2>
-    <p>Solicita una demo y te mostramos como Cumplido se adapta a la operacion de tu restaurante.</p>
+    <p>Te hacemos una demo personalizada con los datos de tu restaurante. Sin compromiso, sin letra pequena.</p>
     <div class="cta-form">
       <input type="email" class="cta-input" placeholder="tu@restaurante.com" aria-label="Email de contacto">
-      <button class="btn btn-primary btn-lg" type="button">Solicitar demo</button>
+      <button class="btn btn-primary btn-lg" type="button">Ver demo gratuita</button>
     </div>
-    <p class="cta-note">Sin compromiso. Te respondemos en menos de 24 horas.</p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/34600000000?text=Hola%2C%20quiero%20ver%20una%20demo%20de%20Cumplido" target="_blank" rel="noopener" class="btn btn-whatsapp btn-md">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Escribenos por WhatsApp
+      </a>
+    </div>
+    <p class="cta-note">Te respondemos en menos de 24 horas. Sin compromiso.</p>
   </div>
 </section>
 
@@ -1557,7 +1907,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 800 + delay);
   });
 
-  // Animate dashboard bars growing
+  // Animate dashboard bars growing (initial)
   var bars = document.querySelectorAll('.dash-bar[data-height]');
   bars.forEach(function(bar, i) {
     var targetHeight = bar.getAttribute('data-height');
@@ -1567,6 +1917,21 @@ document.addEventListener('DOMContentLoaded', function() {
       bar.style.height = targetHeight;
     }, 1000 + i * 100);
   });
+
+  // Continuous bar height variation
+  var barHeights = [
+    ['50%','65%','45%','72%','58%','88%','35%'],
+    ['62%','48%','70%','55%','80%','65%','42%'],
+    ['45%','75%','55%','68%','50%','92%','38%'],
+    ['58%','60%','80%','45%','72%','70%','55%']
+  ];
+  var barIdx = 0;
+  setInterval(function() {
+    barIdx = (barIdx + 1) % barHeights.length;
+    bars.forEach(function(bar, i) {
+      bar.style.height = barHeights[barIdx][i];
+    });
+  }, 5000);
 
   // Animate checklist items appearing one by one
   var tasks = document.querySelectorAll('.dash-task[data-anim]');
@@ -1580,7 +1945,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 600 + i * 150);
   });
 
-  // Animate progress bar
+  // Continuous task checking animation
+  var uncheckIdx = 5;
+  setInterval(function() {
+    var task = tasks[uncheckIdx];
+    if (!task) return;
+    var check = task.querySelector('.dash-task-check');
+    if (task.classList.contains('done')) return;
+    task.classList.add('done');
+    check.classList.add('done');
+    check.innerHTML = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2 5.5 4 7.5 8 3"/></svg>';
+    uncheckIdx++;
+    var doneCount = document.querySelectorAll('.dash-task.done').length;
+    var totalCount = tasks.length;
+    var pct = Math.round(doneCount / totalCount * 100);
+    var progFill = document.querySelector('.dash-progress-fill');
+    var progLabel = document.querySelector('.dash-progress-label');
+    var checkBadge = document.querySelector('.dash-checklist-card .dash-chart-badge');
+    if (progFill) { progFill.style.width = pct + '%'; }
+    if (progLabel) { progLabel.textContent = pct + '%'; }
+    if (checkBadge) { checkBadge.textContent = doneCount + '/' + totalCount; }
+    if (uncheckIdx >= tasks.length) {
+      setTimeout(function() {
+        for (var j = 5; j < tasks.length; j++) {
+          tasks[j].classList.remove('done');
+          tasks[j].querySelector('.dash-task-check').classList.remove('done');
+          tasks[j].querySelector('.dash-task-check').innerHTML = '';
+        }
+        uncheckIdx = 5;
+        if (progFill) { progFill.style.width = '71%'; }
+        if (progLabel) { progLabel.textContent = '71%'; }
+        if (checkBadge) { checkBadge.textContent = '5/7'; }
+      }, 2000);
+    }
+  }, 3000);
+
+  // Animate progress bar (initial)
   var progFills = document.querySelectorAll('.dash-progress-fill[data-width]');
   progFills.forEach(function(fill) {
     var w = fill.getAttribute('data-width');
@@ -1626,6 +2026,18 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     }
   }, 4000);
+
+  // Rotating words animation
+  var rotatingContainer = document.getElementById('rotating');
+  if (rotatingContainer) {
+    var words = rotatingContainer.querySelectorAll('span');
+    var currentWord = 0;
+    setInterval(function() {
+      words[currentWord].classList.remove('active');
+      currentWord = (currentWord + 1) % words.length;
+      words[currentWord].classList.add('active');
+    }, 2000);
+  }
 });
 </script>
 
