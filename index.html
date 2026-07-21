@@ -2053,6 +2053,12 @@ document.addEventListener('DOMContentLoaded', function() {
         body: new URLSearchParams(formData).toString()
       }).then(function() {
         gtag('event', 'generate_lead', { event_category: 'form', event_label: 'demo_request' });
+        // Also add to Brevo contact list
+        fetch('/.netlify/functions/add-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.get('email') })
+        }).catch(function() {});
         demoForm.innerHTML = '<div style="text-align:center;padding:1rem 0;"><div style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Recibido</div><p style="color:var(--c-text-2);">Te contactaremos en menos de 24 horas para agendar tu demo.</p></div>';
       }).catch(function() {
         demoForm.innerHTML = '<div style="text-align:center;padding:1rem 0;"><div style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Recibido</div><p style="color:var(--c-text-2);">Te contactaremos en menos de 24 horas para agendar tu demo.</p></div>';
