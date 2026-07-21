@@ -2052,12 +2052,50 @@ document.addEventListener('DOMContentLoaded', function() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(formData).toString()
       }).then(function() {
+        gtag('event', 'generate_lead', { event_category: 'form', event_label: 'demo_request' });
         demoForm.innerHTML = '<div style="text-align:center;padding:1rem 0;"><div style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Recibido</div><p style="color:var(--c-text-2);">Te contactaremos en menos de 24 horas para agendar tu demo.</p></div>';
       }).catch(function() {
         demoForm.innerHTML = '<div style="text-align:center;padding:1rem 0;"><div style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.5rem;">Recibido</div><p style="color:var(--c-text-2);">Te contactaremos en menos de 24 horas para agendar tu demo.</p></div>';
       });
     });
   }
+
+  // Track CTA clicks
+  document.querySelectorAll('a, button').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var text = (el.textContent || '').trim();
+      var href = el.getAttribute('href') || '';
+      if (href.indexOf('wa.me') !== -1) {
+        gtag('event', 'click_whatsapp', { event_category: 'cta', event_label: 'whatsapp' });
+      } else if (el.id === 'btn-agendar') {
+        gtag('event', 'click_agendar', { event_category: 'cta', event_label: 'agendar_cita' });
+      } else if (text.indexOf('Ver demo') !== -1 && el.tagName === 'A') {
+        gtag('event', 'click_ver_demo', { event_category: 'cta', event_label: 'ver_demo' });
+      } else if (text.indexOf('Ver productos') !== -1) {
+        gtag('event', 'click_ver_productos', { event_category: 'cta', event_label: 'ver_productos' });
+      } else if (text.indexOf('Probar gratis') !== -1) {
+        gtag('event', 'click_probar_gratis', { event_category: 'cta', event_label: 'probar_gratis_suite' });
+      }
+    });
+  });
+
+  // Track scroll to key sections
+  var trackedSections = { productos: false, funcionalidades: false, contacto: false };
+  var sectionObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        if (id && trackedSections[id] === false) {
+          trackedSections[id] = true;
+          gtag('event', 'scroll_section', { event_category: 'engagement', event_label: id });
+        }
+      }
+    });
+  }, { threshold: 0.3 });
+  ['productos', 'funcionalidades', 'contacto'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) sectionObserver.observe(el);
+  });
 });
 </script>
 
