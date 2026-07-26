@@ -49,7 +49,7 @@
       display: flex; align-items: center;
       text-decoration: none;
     }
-    .header-logo img { height: 3rem; width: auto; mix-blend-mode: lighten; }
+    .header-logo svg { height: 2rem; width: auto; }
     .header-right {
       display: flex; align-items: center; gap: 0.8rem;
     }
@@ -471,43 +471,13 @@
     /* Hide */
     .hidden { display: none !important; }
 
-    /* Desktop/tablet: compact layout to avoid scrolling */
-    @media (min-width: 500px) {
-      .header { padding: 0.25rem 1.2rem; }
-      .header-logo img { height: 2rem; }
-      .container { padding: 0.6rem 1.2rem; padding-bottom: 1rem; }
-      .step-label { margin-bottom: 0.1rem; font-size: 0.6rem; }
-      .step-title { font-size: 1.1rem; margin-bottom: 0.5rem; }
-      .cards { gap: 0.4rem; }
-      .card { padding: 0.6rem 0.8rem; }
-      .card-icon { width: 36px; height: 36px; border-radius: 8px; font-size: 1.1rem; }
-      .card-icon svg { width: 18px; height: 18px; }
-      .card-title { font-size: 0.85rem; }
-      .card-desc { font-size: 0.7rem; }
-      .card-badge { font-size: 0.6rem; }
-      .daily-progress { padding: 0.5rem 0.7rem; margin-bottom: 0.5rem; }
-      .daily-progress-title { margin-bottom: 0.3rem; font-size: 0.65rem; }
-      .daily-stat { padding: 0.3rem 0.2rem; }
-      .daily-stat-num { font-size: 0.9rem; }
-      .daily-stat-label { font-size: 0.55rem; }
-      .intro { padding-top: 2vh; }
-      .intro-icon { width: 50px; height: 50px; margin-bottom: 0.6rem; }
-      .intro h1 { font-size: 1.3rem; margin-bottom: 0.2rem; }
-      .intro p { font-size: 0.8rem; margin-bottom: 1rem; }
-      .intro-features { margin-bottom: 1rem; }
-      .task { padding: 0.55rem 0.8rem; }
-      .task-text { font-size: 0.8rem; }
-      .checkbox { width: 20px; height: 20px; }
-      .progress-wrap { margin-bottom: 0.6rem; }
-      .breadcrumb { margin-bottom: 0.5rem; font-size: 0.7rem; }
-    }
   </style>
 </head>
 <body>
 
 <header class="header">
   <a href="/" class="header-logo">
-    <img src="logo-solo.png" alt="Cumplido">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" fill="none"><path d="M30 5C17.2 5 7 15.2 7 28s10.2 23 23 23c4 0 7.8-1 11.1-2.9" stroke="#0D7C66" stroke-width="5.5" stroke-linecap="round"/><polyline points="17,28 26,37 45,18" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><text x="62" y="40" font-family="Inter,sans-serif" font-weight="700" font-size="36" fill="#fff">cumplido</text><circle cx="225.5" cy="12" r="3" fill="#0D7C66"/></svg>
   </a>
   <div class="header-right">
     <span class="demo-badge">Demo</span>
