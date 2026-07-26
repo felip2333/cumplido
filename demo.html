@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Demo interactivo de Cumplido — Software de checklists operativos y APPCC para restaurantes.">
+  <title>Demo — Cumplido</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='15' fill='%230D7C66'/><polyline points='9 17 14 22 23 11' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0b0d;
+      --surface: #131518;
+      --surface2: #1a1d21;
+      --border: #262a30;
+      --primary: #0D7C66;
+      --primary-light: #0fa37f;
+      --primary-tint: rgba(13,124,102,0.12);
+      --primary-glow: rgba(13,124,102,0.3);
+      --text: #f2f0ec;
+      --text-muted: #8a8d92;
+      --green: #4caf78;
+      --red: #e05c5c;
+      --orange: #e8993e;
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.8rem 1.2rem;
+      background: rgba(10,11,13,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 800; font-size: 1.1rem; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--text);
+      text-decoration: none;
+    }
+    .header-logo svg { width: 28px; height: 28px; }
+    .header-right {
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .header-user {
+      font-size: 0.8rem; color: var(--text-muted); font-weight: 500;
+    }
+    .demo-badge {
+      background: var(--primary-tint);
+      color: var(--primary-light);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* Container */
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1.2rem;
+      padding-bottom: 6rem;
+    }
+
+    /* Step title */
+    .step-label {
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.3rem;
+    }
+    .step-title {
+      font-size: 1.5rem; font-weight: 800;
+      margin-bottom: 1.2rem;
+    }
+
+    /* Cards grid */
+    .cards { display: flex; flex-direction: column; gap: 0.7rem; }
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .card:hover {
+      border-color: var(--primary);
+      background: var(--surface2);
+      transform: translateY(-1px);
+    }
+    .card:active { transform: scale(0.97); }
+    .card-icon {
+      width: 48px; height: 48px;
+      background: var(--primary-tint);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .card-content { flex: 1; }
+    .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.15rem; }
+    .card-desc { font-size: 0.8rem; color: var(--text-muted); }
+    .card-arrow { color: var(--text-muted); font-size: 1.2rem; }
+    .card-badge {
+      font-size: 0.65rem; font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+    .badge-pending { background: rgba(232,153,62,0.15); color: var(--orange); }
+    .badge-done { background: rgba(76,175,120,0.15); color: var(--green); }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.75rem; color: var(--text-muted);
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .breadcrumb span { cursor: pointer; }
+    .breadcrumb span:hover { color: var(--primary-light); }
+    .breadcrumb .sep { color: var(--border); }
+    .breadcrumb .current { color: var(--text); font-weight: 600; }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 1.2rem;
+    }
+    .progress-info {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .progress-text { font-size: 0.8rem; color: var(--text-muted); }
+    .progress-count { font-size: 0.8rem; font-weight: 700; color: var(--primary-light); }
+    .progress-bar {
+      width: 100%; height: 6px;
+      background: var(--surface2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    /* Task list */
+    .task-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .task {
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .task:hover { border-color: var(--primary); }
+    .task.completed {
+      border-color: rgba(76,175,120,0.3);
+      background: rgba(76,175,120,0.05);
+    }
+    .task.completed .task-text { color: var(--text-muted); text-decoration: line-through; }
+    .checkbox {
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .task.completed .checkbox {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .checkbox svg { opacity: 0; transition: opacity 0.2s; }
+    .task.completed .checkbox svg { opacity: 1; }
+    .task-text { font-size: 0.85rem; font-weight: 500; }
+    .task-subsection {
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 1rem 0 0.3rem;
+      padding-left: 0.2rem;
+    }
+
+    /* APPCC Cleaning */
+    .clean-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      gap: 0.8rem;
+    }
+    .clean-item:hover { border-color: var(--primary); }
+    .clean-text { font-size: 0.85rem; font-weight: 500; flex: 1; }
+    .clean-freq {
+      font-size: 0.6rem; font-weight: 600;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .clean-status {
+      width: 36px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .clean-none { background: var(--surface2); color: var(--text-muted); }
+    .clean-l { background: rgba(232,153,62,0.2); color: var(--orange); }
+    .clean-ld { background: rgba(76,175,120,0.2); color: var(--green); }
+
+    /* APPCC Temperature */
+    .temp-item {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem;
+      transition: all 0.2s;
+    }
+    .temp-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.6rem; }
+    .temp-inputs { display: flex; gap: 0.6rem; }
+    .temp-field { flex: 1; }
+    .temp-label {
+      font-size: 0.65rem; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.3rem;
+    }
+    .temp-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.7rem;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .temp-input:focus { border-color: var(--primary); }
+    .temp-input::placeholder { color: var(--text-muted); font-weight: 400; }
+    .temp-range { font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: 0.2rem; }
+
+    /* Bottom bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 1rem 1.2rem;
+      background: rgba(10,11,13,0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      z-index: 100;
+    }
+    .bottom-bar .container { padding: 0; margin: 0 auto; }
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px var(--primary-glow); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Back button */
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem; font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      padding: 0.3rem 0;
+    }
+    .btn-back:hover { color: var(--text); }
+
+    /* Success overlay */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,11,13,0.95);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      animation: fadeIn 0.3s;
+      padding: 2rem;
+    }
+    .success-icon {
+      width: 80px; height: 80px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+      animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .success-icon svg { width: 40px; height: 40px; }
+    .overlay h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center; }
+    .overlay p { color: var(--text-muted); font-size: 0.9rem; text-align: center; margin-bottom: 2rem; max-width: 320px; }
+    .overlay .btn-primary { max-width: 320px; }
+    .overlay .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 2rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.7rem;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+    .overlay .btn-secondary:hover { border-color: var(--primary); color: var(--primary-light); }
+
+    /* CTA overlay */
+    .cta-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+    }
+    .cta-box h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .cta-box p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .cta-box .btn-primary { max-width: 100%; }
+    .cta-box .btn-secondary { max-width: 100%; }
+
+    /* Date display */
+    .date-display {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .date-display svg { color: var(--primary-light); }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    .fade-up { animation: fadeUp 0.3s ease both; }
+    .task-list .task:nth-child(1) { animation-delay: 0s; }
+    .task-list .task:nth-child(2) { animation-delay: 0.03s; }
+    .task-list .task:nth-child(3) { animation-delay: 0.06s; }
+    .task-list .task:nth-child(4) { animation-delay: 0.09s; }
+    .task-list .task:nth-child(5) { animation-delay: 0.12s; }
+    .task-list .task:nth-child(6) { animation-delay: 0.15s; }
+    .task-list .task:nth-child(7) { animation-delay: 0.18s; }
+    .task-list .task:nth-child(8) { animation-delay: 0.21s; }
+    .task-list .task:nth-child(9) { animation-delay: 0.24s; }
+    .task-list .task:nth-child(10) { animation-delay: 0.27s; }
+
+    /* Intro screen */
+    .intro {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: calc(100dvh - 60px);
+      text-align: center;
+      padding: 2rem;
+    }
+    .intro-icon {
+      width: 72px; height: 72px;
+      background: var(--primary-tint);
+      border: 2px solid var(--primary);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .intro h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 0.5rem; }
+    .intro h1 span { color: var(--primary-light); }
+    .intro p { color: var(--text-muted); font-size: 0.95rem; max-width: 360px; margin-bottom: 2rem; line-height: 1.5; }
+    .intro .btn-primary { max-width: 320px; }
+    .intro-features {
+      display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;
+    }
+    .intro-feat {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .intro-feat svg { color: var(--primary-light); flex-shrink: 0; }
+
+    /* Notification dot */
+    .notif-dot {
+      width: 8px; height: 8px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Daily progress */
+    .daily-progress {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .daily-progress-title {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 0.6rem;
+    }
+    .daily-stats {
+      display: flex; gap: 0.8rem;
+    }
+    .daily-stat {
+      flex: 1; text-align: center;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 0.6rem 0.4rem;
+    }
+    .daily-stat-num { font-size: 1.2rem; font-weight: 800; }
+    .daily-stat-num.green { color: var(--green); }
+    .daily-stat-num.orange { color: var(--orange); }
+    .daily-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.1rem; }
+
+    /* Hide */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="header-logo">
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#0D7C66"/><polyline points="9 17 14 22 23 11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Cumplido
+  </a>
+  <div class="header-right">
+    <span class="demo-badge">Demo</span>
+    <span class="header-user" id="header-user"></span>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- INTRO -->
+  <div id="view-intro" class="intro">
+    <div class="intro-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0fa37f" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    </div>
+    <h1>Prueba <span>Cumplido</span></h1>
+    <p>Explora la app que usan los equipos de restaurante para controlar operaciones, APPCC y limpieza cada día.</p>
+    <div class="intro-features">
+      <div class="intro-feat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
+        Checklists por turno
+      </div>
+      <div class="intro-feat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10l4 4"/><circle cx="12" cy="12" r="10"/></svg>
+        Limpieza APPCC
+      </div>
+      <div class="intro-feat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4v10.54a4 4 0 11-4 0V4a2 2 0 014 0z"/></svg>
+        Temperaturas APPCC
+      </div>
+    </div>
+    <button class="btn-primary" onclick="startDemo()">Comenzar demo</button>
+  </div>
+
+  <!-- AREA SELECT -->
+  <div id="view-area" class="container hidden">
+    <div class="step-label">Paso 1</div>
+    <div class="step-title">Selecciona el area</div>
+
+    <div class="daily-progress">
+      <div class="daily-progress-title">Progreso del dia</div>
+      <div class="daily-stats">
+        <div class="daily-stat"><div class="daily-stat-num green">3</div><div class="daily-stat-label">Hechos</div></div>
+        <div class="daily-stat"><div class="daily-stat-num orange">6</div><div class="daily-stat-label">Pendientes</div></div>
+        <div class="daily-stat"><div class="daily-stat-num">9</div><div class="daily-stat-label">Total</div></div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="selectArea('sala')">
+        <div class="card-icon">🍽️</div>
+        <div class="card-content">
+          <div class="card-title">Sala</div>
+          <div class="card-desc">Comedor y servicio</div>
+        </div>
+        <span class="card-badge badge-pending">3 pendientes</span>
+      </div>
+      <div class="card" onclick="selectArea('cocteleria')">
+        <div class="card-icon">🍸</div>
+        <div class="card-content">
+          <div class="card-title">Cocteleria</div>
+          <div class="card-desc">Barra y terraza</div>
+        </div>
+        <span class="card-badge badge-pending">2 pendientes</span>
+      </div>
+      <div class="card" onclick="selectArea('cocina')">
+        <div class="card-icon">👨‍🍳</div>
+        <div class="card-content">
+          <div class="card-title">Cocina</div>
+          <div class="card-desc">Cocina y almacen</div>
+        </div>
+        <span class="card-badge badge-done">Hecho</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOW SELECT -->
+  <div id="view-flow" class="container hidden">
+    <button class="btn-back" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver
+    </button>
+    <div class="step-label">Paso 2</div>
+    <div class="step-title" id="flow-title">Que quieres registrar?</div>
+
+    <div class="date-display">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="date-text"></span>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="selectFlow('operativo')">
+        <div class="card-icon">✅</div>
+        <div class="card-content">
+          <div class="card-title">Checklist operativo</div>
+          <div class="card-desc">Tareas del turno</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </div>
+      <div class="card" onclick="selectFlow('limpieza')">
+        <div class="card-icon">🧹</div>
+        <div class="card-content">
+          <div class="card-title">Limpieza APPCC</div>
+          <div class="card-desc">Registro de limpieza y desinfeccion</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </div>
+      <div class="card" onclick="selectFlow('temperatura')">
+        <div class="card-icon">🌡️</div>
+        <div class="card-content">
+          <div class="card-title">Temperatura APPCC</div>
+          <div class="card-desc">Control de frio</div>
+        </div>
+        <span class="card-arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION SELECT -->
+  <div id="view-section" class="container hidden">
+    <button class="btn-back" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver
+    </button>
+    <div class="breadcrumb" id="breadcrumb-section"></div>
+    <div class="step-label">Paso 3</div>
+    <div class="step-title">Selecciona el turno</div>
+    <div class="cards" id="section-cards"></div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div id="view-checklist" class="container hidden">
+    <button class="btn-back" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver
+    </button>
+    <div class="breadcrumb" id="breadcrumb-check"></div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-text" id="progress-label">Progreso</span>
+        <span class="progress-count" id="progress-count">0/0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="task-list" id="task-list"></div>
+  </div>
+
+  <!-- APPCC CLEANING -->
+  <div id="view-cleaning" class="container hidden">
+    <button class="btn-back" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver
+    </button>
+    <div class="breadcrumb" id="breadcrumb-clean"></div>
+    <div class="step-title" style="font-size:1.1rem;margin-bottom:0.3rem" id="clean-zone-title"></div>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">Toca cada item para cambiar: — → L → L+D → —</p>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-text">Progreso</span>
+        <span class="progress-count" id="clean-progress-count">0/0</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="clean-progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="task-list" id="clean-list"></div>
+  </div>
+
+  <!-- APPCC TEMPERATURE -->
+  <div id="view-temperature" class="container hidden">
+    <button class="btn-back" onclick="goBack()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver
+    </button>
+    <div class="breadcrumb" id="breadcrumb-temp"></div>
+    <div class="step-title" style="font-size:1.1rem;margin-bottom:1rem" id="temp-zone-title"></div>
+    <div class="task-list" id="temp-list"></div>
+  </div>
+
+</main>
+
+<!-- Bottom bar -->
+<div class="bottom-bar hidden" id="bottom-bar">
+  <div class="container">
+    <button class="btn-primary" id="btn-submit" onclick="submitForm()">Enviar registro</button>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div class="overlay hidden" id="overlay-success">
+  <div class="success-icon">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <h2>Registro guardado</h2>
+  <p>Esto es lo que tu equipo ve cada día. Todos los datos quedan registrados para auditorías e inspecciones.</p>
+  <button class="btn-primary" onclick="showCTA()">Continuar</button>
+</div>
+
+<!-- CTA overlay -->
+<div class="overlay hidden" id="overlay-cta">
+  <div class="cta-box">
+    <h2>Te gusto Cumplido?</h2>
+    <p>Agenda una llamada de 15 minutos y te ayudamos a configurarlo para tu restaurante. Sin compromiso.</p>
+    <a href="https://cal.eu/felipe-suarez-vcwtg0/15min" target="_blank" rel="noopener" class="btn-primary" style="display:block;text-decoration:none;text-align:center;">Agendar llamada gratuita</a>
+    <button class="btn-secondary" onclick="resetDemo()">Seguir explorando el demo</button>
+  </div>
+</div>
+
+<script>
+var DEMO_DATA = {
+  sala: {
+    label: 'Sala',
+    sections: {
+      apertura: {
+        label: 'Apertura',
+        icon: '☀️',
+        tasks: [
+          'Encender luces del comedor y terraza',
+          'Verificar mesas y sillas alineadas',
+          'Revisar limpieza de cristaleria',
+          'Montar mise en place de servilletas',
+          'Comprobar reservas del dia',
+          'Preparar menus y cartas',
+          'Encender sistema de musica',
+          'Verificar temperatura del salon',
+          'Revisar uniforme del equipo',
+          'Briefing de equipo: platos del dia',
+          'Abrir puertas al publico'
+        ]
+      },
+      entreturno: {
+        label: 'Entreturno',
+        icon: '⛅',
+        tasks: [
+          'Recoger mesas del turno anterior',
+          'Limpiar y desinfectar superficies',
+          'Reponer servilletas y cubiertos',
+          'Barrer y fregar suelos',
+          'Vaciar papeleras',
+          'Verificar banos limpios',
+          'Reponer jabon y papel',
+          'Revisar stock de bebidas',
+          'Preparar mesas para cena',
+          'Revisar reservas de noche',
+          'Limpiar cristales de entrada',
+          'Regar plantas',
+          'Comprobar aire acondicionado',
+          'Verificar iluminacion nocturna',
+          'Briefing equipo nocturno'
+        ]
+      },
+      cierre: {
+        label: 'Cierre',
+        icon: '🌙',
+        tasks: [
+          'Recoger todas las mesas',
+          'Limpiar y desinfectar barra',
+          'Vaciar y limpiar cafeteras',
+          'Apagar maquinas de hielo',
+          'Cerrar grifos de cerveza',
+          'Limpiar cristaleria pendiente',
+          'Barrer y fregar todo el salon',
+          'Limpiar banos a fondo',
+          'Vaciar todas las papeleras',
+          'Guardar manteleria limpia',
+          'Cuadrar caja del dia',
+          'Apagar musica y televisores',
+          'Cerrar terraza',
+          'Bajar persianas',
+          'Activar alarma',
+          'Apagar luces',
+          'Revisar que no quede nadie',
+          'Cerrar puerta principal',
+          'Enviar reporte de cierre',
+          'Guardar llaves'
+        ]
+      }
+    },
+    cleaning: {
+      'Office Superior': [
+        {t:'Encimeras y superficies',f:'D'},{t:'Fregadero industrial',f:'D'},{t:'Lavavajillas (exterior)',f:'D'},
+        {t:'Estanterias',f:'S'},{t:'Suelo completo',f:'D'},{t:'Paredes azulejadas',f:'S'},
+        {t:'Campana extractora',f:'M'},{t:'Cubo de basura',f:'D'},{t:'Griferia',f:'D'},{t:'Desagues',f:'S'}
+      ],
+      'Barra': [
+        {t:'Superficie de barra',f:'D'},{t:'Cafetera (purga y limpieza)',f:'D'},{t:'Grifo de cerveza',f:'D'},
+        {t:'Neveras de barra (exterior)',f:'D'},{t:'Neveras de barra (interior)',f:'S'},{t:'Vitrina',f:'D'},
+        {t:'Botellero',f:'S'},{t:'Estanterias traseras',f:'S'},{t:'Suelo detras de barra',f:'D'}
+      ]
+    },
+    temps: [
+      {name:'Nevera Vinos Copa', range:'0-4°C'},
+      {name:'Nevera Cervezas', range:'0-4°C'},
+      {name:'Nevera Refrescos', range:'0-4°C'},
+      {name:'Refrigerador Tintos 1', range:'14-18°C'},
+      {name:'Refrigerador Blancos', range:'0-4°C'}
+    ]
+  },
+  cocteleria: {
+    label: 'Cocteleria',
+    sections: {
+      apertura: {
+        label: 'Apertura',
+        icon: '☀️',
+        subsections: {
+          'Terraza': [
+            'Sacar mobiliario de terraza',
+            'Limpiar mesas y sillas',
+            'Colocar ceniceros y servilleteros',
+            'Verificar sombrillas/toldos',
+            'Barrer terraza'
+          ],
+          'Barra': [
+            'Encender neveras y maquinas',
+            'Preparar mise en place de cocteleria',
+            'Cortar frutas y garnishes',
+            'Verificar stock de licores',
+            'Preparar siropes del dia',
+            'Limpiar superficie de barra',
+            'Preparar hielo',
+            'Verificar cristaleria limpia',
+            'Colocar posavasos',
+            'Encender luces de ambiente'
+          ]
+        }
+      },
+      cierre: {
+        label: 'Cierre',
+        icon: '🌙',
+        tasks: [
+          'Limpiar coctelera y utensilios',
+          'Guardar frutas en nevera',
+          'Tapar botellas abiertas',
+          'Limpiar superficie de barra',
+          'Vaciar cubos de hielo',
+          'Limpiar cristaleria',
+          'Recoger terraza',
+          'Guardar mobiliario exterior',
+          'Barrer y fregar zona de barra',
+          'Cuadrar caja',
+          'Apagar equipos',
+          'Cerrar y activar alarma'
+        ]
+      }
+    },
+    cleaning: {
+      'Cocteleria': [
+        {t:'Superficie de barra',f:'D'},{t:'Estacion de cocteleria',f:'D'},{t:'Speed rack',f:'D'},
+        {t:'Neveras verticales (exterior)',f:'D'},{t:'Neveras verticales (interior)',f:'S'},
+        {t:'Pica y fregadero',f:'D'},{t:'Mesa fria',f:'D'},{t:'Suelo completo',f:'D'},
+        {t:'Botellero superior',f:'S'},{t:'Cristaleria y copas',f:'D'}
+      ]
+    },
+    temps: [
+      {name:'Nevera Vertical 1', range:'0-4°C'},
+      {name:'Nevera Vertical 2', range:'0-4°C'},
+      {name:'Nevera Vertical 3', range:'0-4°C'},
+      {name:'Nevera Vertical 4', range:'0-4°C'},
+      {name:'Mesa Fria', range:'0-4°C'}
+    ]
+  },
+  cocina: {
+    label: 'Cocina',
+    sections: {
+      am: {
+        label: 'Turno AM',
+        icon: '☀️',
+        tasks: [
+          'Encender hornos y planchas',
+          'Verificar mise en place de frio',
+          'Preparar fondos y salsas base',
+          'Revisar pedidos recibidos',
+          'Comprobar caducidades',
+          'Etiquetar preparaciones nuevas',
+          'Verificar stock critico',
+          'Preparar menu del dia',
+          'Briefing con equipo de cocina'
+        ]
+      },
+      pm: {
+        label: 'Turno PM',
+        icon: '🌙',
+        tasks: [
+          'Reponer mise en place para cena',
+          'Limpiar planchas y hornos',
+          'Organizar camaras frigorificas',
+          'Film y etiquetar sobrantes',
+          'Limpiar campana extractora',
+          'Fregar suelos de cocina',
+          'Vaciar cubos de basura',
+          'Sacar basura a contenedores',
+          'Apagar equipos no necesarios',
+          'Verificar que todo esta apagado',
+          'Cerrar camaras frigorificas'
+        ]
+      }
+    },
+    cleaning: {
+      'Cocina y Office': [
+        {t:'Encimeras de trabajo',f:'D'},{t:'Tablas de corte',f:'D'},{t:'Plancha y fogones',f:'D'},
+        {t:'Horno (interior)',f:'S'},{t:'Campana extractora',f:'M'},{t:'Fregadero industrial',f:'D'},
+        {t:'Lavavajillas',f:'D'},{t:'Suelo completo',f:'D'},{t:'Paredes y azulejos',f:'S'},
+        {t:'Estanterias',f:'S'},{t:'Cubos de basura',f:'D'}
+      ],
+      'Camaras Frigorificas': [
+        {t:'Camara refrigeracion (suelo)',f:'D'},{t:'Camara refrigeracion (estantes)',f:'S'},
+        {t:'Camara congelacion (suelo)',f:'S'},{t:'Camara congelacion (estantes)',f:'M'},
+        {t:'Juntas de puertas',f:'S'},{t:'Termometro verificacion',f:'D'}
+      ]
+    },
+    temps: [
+      {name:'Camara Refrigeracion', range:'0-4°C'},
+      {name:'Camara Congelacion', range:'< -18°C'},
+      {name:'Isla Fria 1', range:'0-4°C'},
+      {name:'Isla Fria 2', range:'0-4°C'},
+      {name:'Cajones Frios', range:'0-4°C'},
+      {name:'Arcon Congelador', range:'< -18°C'}
+    ]
+  }
+};
+
+var FREQ_LABELS = {D:'Diario',S:'Semanal',M:'Mensual',A:'Anual'};
+
+var state = { area: null, flow: null, section: null, cleanZone: null };
+var completedTasks = {};
+var cleanStates = {};
+var tempValues = {};
+var submitCount = 0;
+
+function show(id) {
+  document.querySelectorAll('#app > div').forEach(function(v) { v.classList.add('hidden'); });
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function showBottom(visible) {
+  document.getElementById('bottom-bar').classList.toggle('hidden', !visible);
+}
+
+function startDemo() {
+  document.getElementById('header-user').textContent = 'Carlos M.';
+  show('view-area');
+}
+
+function selectArea(area) {
+  state.area = area;
+  document.getElementById('flow-title').textContent = DEMO_DATA[area].label + ' — Que quieres registrar?';
+  var now = new Date();
+  var days = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+  var months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('date-text').textContent = days[now.getDay()] + ' ' + now.getDate() + ' de ' + months[now.getMonth()] + ', ' + now.getFullYear();
+  show('view-flow');
+}
+
+function selectFlow(flow) {
+  state.flow = flow;
+  if (flow === 'operativo') {
+    renderSections();
+    show('view-section');
+  } else if (flow === 'limpieza') {
+    renderCleaningZones();
+  } else if (flow === 'temperatura') {
+    renderTemperature();
+  }
+}
+
+function renderSections() {
+  var data = DEMO_DATA[state.area];
+  var bc = document.getElementById('breadcrumb-section');
+  bc.innerHTML = '<span onclick="show(\'view-area\')">' + data.label + '</span><span class="sep">›</span><span class="current">Turno</span>';
+  var container = document.getElementById('section-cards');
+  container.innerHTML = '';
+  var sections = data.sections;
+  for (var key in sections) {
+    var s = sections[key];
+    var div = document.createElement('div');
+    div.className = 'card fade-up';
+    div.setAttribute('onclick', 'selectSection("' + key + '")');
+    div.innerHTML = '<div class="card-icon">' + s.icon + '</div><div class="card-content"><div class="card-title">' + s.label + '</div><div class="card-desc">' + countTasks(s) + ' tareas</div></div><span class="card-badge badge-pending">Pendiente</span>';
+    container.appendChild(div);
+  }
+}
+
+function countTasks(section) {
+  if (section.tasks) return section.tasks.length;
+  if (section.subsections) {
+    var c = 0;
+    for (var k in section.subsections) c += section.subsections[k].length;
+    return c;
+  }
+  return 0;
+}
+
+function selectSection(section) {
+  state.section = section;
+  completedTasks = {};
+  renderChecklist();
+  show('view-checklist');
+  showBottom(true);
+}
+
+function renderChecklist() {
+  var data = DEMO_DATA[state.area];
+  var section = data.sections[state.section];
+  var bc = document.getElementById('breadcrumb-check');
+  bc.innerHTML = '<span onclick="show(\'view-area\')">' + data.label + '</span><span class="sep">›</span><span onclick="show(\'view-section\')">' + section.label + '</span><span class="sep">›</span><span class="current">Checklist</span>';
+
+  var list = document.getElementById('task-list');
+  list.innerHTML = '';
+  var tasks = [];
+
+  if (section.subsections) {
+    for (var sub in section.subsections) {
+      var h = document.createElement('div');
+      h.className = 'task-subsection';
+      h.textContent = sub;
+      list.appendChild(h);
+      section.subsections[sub].forEach(function(t) {
+        tasks.push(t);
+        list.appendChild(createTaskEl(t, tasks.length - 1));
+      });
+    }
+  } else {
+    section.tasks.forEach(function(t, i) {
+      tasks.push(t);
+      list.appendChild(createTaskEl(t, i));
+    });
+  }
+  state.totalTasks = tasks.length;
+  updateProgress();
+}
+
+function createTaskEl(text, idx) {
+  var div = document.createElement('div');
+  div.className = 'task fade-up' + (completedTasks[idx] ? ' completed' : '');
+  div.setAttribute('onclick', 'toggleTask(' + idx + ', this)');
+  div.innerHTML = '<div class="checkbox"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><span class="task-text">' + text + '</span>';
+  return div;
+}
+
+function toggleTask(idx, el) {
+  completedTasks[idx] = !completedTasks[idx];
+  el.classList.toggle('completed');
+  updateProgress();
+}
+
+function updateProgress() {
+  var done = Object.keys(completedTasks).filter(function(k) { return completedTasks[k]; }).length;
+  var total = state.totalTasks || 1;
+  document.getElementById('progress-count').textContent = done + '/' + total;
+  document.getElementById('progress-fill').style.width = (done / total * 100) + '%';
+  document.getElementById('btn-submit').disabled = done === 0;
+}
+
+/* CLEANING */
+function renderCleaningZones() {
+  var data = DEMO_DATA[state.area];
+  var zones = Object.keys(data.cleaning);
+  if (zones.length === 1) {
+    state.cleanZone = zones[0];
+    renderCleaning();
+    show('view-cleaning');
+    showBottom(true);
+    return;
+  }
+  var container = document.getElementById('section-cards');
+  container.innerHTML = '';
+  var bc = document.getElementById('breadcrumb-section');
+  bc.innerHTML = '<span onclick="show(\'view-area\')">' + data.label + '</span><span class="sep">›</span><span class="current">Zona APPCC</span>';
+  document.querySelector('#view-section .step-title').textContent = 'Selecciona la zona';
+  zones.forEach(function(z) {
+    var div = document.createElement('div');
+    div.className = 'card fade-up';
+    div.setAttribute('onclick', 'selectCleanZone("' + z + '")');
+    div.innerHTML = '<div class="card-icon">🧹</div><div class="card-content"><div class="card-title">' + z + '</div><div class="card-desc">' + data.cleaning[z].length + ' elementos</div></div><span class="card-arrow">›</span>';
+    container.appendChild(div);
+  });
+  show('view-section');
+}
+
+function selectCleanZone(zone) {
+  state.cleanZone = zone;
+  cleanStates = {};
+  renderCleaning();
+  show('view-cleaning');
+  showBottom(true);
+}
+
+function renderCleaning() {
+  var data = DEMO_DATA[state.area];
+  var items = data.cleaning[state.cleanZone];
+  document.getElementById('clean-zone-title').textContent = state.cleanZone;
+  var bc = document.getElementById('breadcrumb-clean');
+  bc.innerHTML = '<span onclick="show(\'view-area\')">' + data.label + '</span><span class="sep">›</span><span class="current">' + state.cleanZone + '</span>';
+
+  var list = document.getElementById('clean-list');
+  list.innerHTML = '';
+  items.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'clean-item fade-up';
+    div.setAttribute('onclick', 'toggleClean(' + i + ')');
+    div.id = 'clean-' + i;
+    div.innerHTML = '<span class="clean-text">' + item.t + '</span><span class="clean-freq">' + FREQ_LABELS[item.f] + '</span><div class="clean-status clean-none" id="clean-status-' + i + '">—</div>';
+    list.appendChild(div);
+  });
+  state.totalClean = items.length;
+  updateCleanProgress();
+}
+
+function toggleClean(idx) {
+  var cycle = [null, 'L', 'LD'];
+  var current = cleanStates[idx] || null;
+  var next = cycle[(cycle.indexOf(current) + 1) % 3];
+  cleanStates[idx] = next;
+  var el = document.getElementById('clean-status-' + idx);
+  if (next === 'L') { el.className = 'clean-status clean-l'; el.textContent = 'L'; }
+  else if (next === 'LD') { el.className = 'clean-status clean-ld'; el.textContent = 'L+D'; }
+  else { el.className = 'clean-status clean-none'; el.textContent = '—'; }
+  updateCleanProgress();
+}
+
+function updateCleanProgress() {
+  var done = Object.keys(cleanStates).filter(function(k) { return cleanStates[k]; }).length;
+  var total = state.totalClean || 1;
+  document.getElementById('clean-progress-count').textContent = done + '/' + total;
+  document.getElementById('clean-progress-fill').style.width = (done / total * 100) + '%';
+  document.getElementById('btn-submit').disabled = done === 0;
+}
+
+/* TEMPERATURE */
+function renderTemperature() {
+  var data = DEMO_DATA[state.area];
+  var temps = data.temps;
+  document.getElementById('temp-zone-title').textContent = data.label + ' — Control de temperaturas';
+  var bc = document.getElementById('breadcrumb-temp');
+  bc.innerHTML = '<span onclick="show(\'view-area\')">' + data.label + '</span><span class="sep">›</span><span class="current">Temperaturas</span>';
+
+  var list = document.getElementById('temp-list');
+  list.innerHTML = '';
+  temps.forEach(function(unit, i) {
+    var div = document.createElement('div');
+    div.className = 'temp-item fade-up';
+    div.innerHTML = '<div class="temp-name">' + unit.name + '</div>' +
+      '<div class="temp-inputs">' +
+        '<div class="temp-field"><div class="temp-label">Manana</div><input type="number" class="temp-input" placeholder="°C" id="temp-m-' + i + '" oninput="checkTemps()"></div>' +
+        '<div class="temp-field"><div class="temp-label">Tarde</div><input type="number" class="temp-input" placeholder="°C" id="temp-t-' + i + '" oninput="checkTemps()"></div>' +
+      '</div>' +
+      '<div class="temp-range">Rango: ' + unit.range + '</div>';
+    list.appendChild(div);
+  });
+  state.totalTemps = temps.length;
+  show('view-temperature');
+  showBottom(true);
+  document.getElementById('btn-submit').disabled = true;
+}
+
+function checkTemps() {
+  var filled = 0;
+  for (var i = 0; i < state.totalTemps; i++) {
+    var m = document.getElementById('temp-m-' + i).value;
+    var t = document.getElementById('temp-t-' + i).value;
+    if (m || t) filled++;
+  }
+  document.getElementById('btn-submit').disabled = filled === 0;
+}
+
+/* SUBMIT */
+function submitForm() {
+  submitCount++;
+  showBottom(false);
+  document.getElementById('overlay-success').classList.remove('hidden');
+}
+
+function showCTA() {
+  document.getElementById('overlay-success').classList.add('hidden');
+  if (submitCount >= 2) {
+    document.getElementById('overlay-cta').classList.remove('hidden');
+  } else {
+    resetToArea();
+  }
+}
+
+function resetDemo() {
+  document.getElementById('overlay-cta').classList.add('hidden');
+  submitCount = 0;
+  resetToArea();
+}
+
+function resetToArea() {
+  completedTasks = {};
+  cleanStates = {};
+  state.flow = null;
+  state.section = null;
+  state.cleanZone = null;
+  show('view-area');
+}
+
+function goBack() {
+  showBottom(false);
+  var current = document.querySelector('#app > div:not(.hidden)').id;
+  if (current === 'view-flow') show('view-area');
+  else if (current === 'view-section') show('view-flow');
+  else if (current === 'view-checklist') { show('view-section'); renderSections(); }
+  else if (current === 'view-cleaning') {
+    var zones = Object.keys(DEMO_DATA[state.area].cleaning);
+    if (zones.length === 1) show('view-flow');
+    else { show('view-section'); renderCleaningZones(); }
+  }
+  else if (current === 'view-temperature') show('view-flow');
+}
+</script>
+
+</body>
+</html>
