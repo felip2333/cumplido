@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Demo del dashboard financiero de Cumplido — Ventas, costes y compras de tu restaurante.">
+  <title>Dashboard Demo — Cumplido</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 4C11.16 4 4 11.16 4 20s7.16 16 16 16c2.8 0 5.44-.72 7.74-2' stroke='%230D7C66' stroke-width='4' stroke-linecap='round' fill='none'/><polyline points='12 20 18 26 32 12' fill='none' stroke='%230D7C66' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0b0d;
+      --surface: #131518;
+      --surface2: #1a1d21;
+      --surface3: #22262b;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --primary: #0D7C66;
+      --primary-light: #0fa37f;
+      --primary-tint: rgba(13,124,102,0.12);
+      --text: #f0f0f5;
+      --text2: #8a8d92;
+      --text3: #55556a;
+      --green: #22c997;
+      --red: #ff5c7a;
+      --amber: #ffb547;
+      --blue: #4da6ff;
+      --purple: #b07fff;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+    }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 1.2rem;
+      background: rgba(10,11,13,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-logo { display: flex; align-items: center; text-decoration: none; }
+    .header-logo img { height: 2.5rem; width: auto; }
+    .header-right { display: flex; align-items: center; gap: 0.8rem; }
+    .header-user { font-size: 0.8rem; color: var(--text2); font-weight: 500; }
+    .demo-badge {
+      background: var(--primary-tint); color: var(--primary-light);
+      font-size: 0.6rem; font-weight: 700;
+      padding: 0.2rem 0.5rem; border-radius: 20px;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 0.75rem 1.2rem;
+      font-size: 0.78rem; font-weight: 500;
+      color: var(--text3);
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--text2); }
+    .tab-btn.active {
+      color: var(--primary-light);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.2rem;
+    }
+
+    /* KPI row */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 1.2rem;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+    }
+    .kpi-accent { border-top: 2px solid var(--primary); }
+    .kpi-label {
+      font-size: 0.65rem; font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+    .kpi-value {
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--text);
+    }
+    .kpi-delta {
+      font-size: 0.7rem; font-weight: 500;
+      margin-top: 0.15rem;
+    }
+    .kpi-delta.pos { color: var(--green); }
+    .kpi-delta.neg { color: var(--red); }
+    .kpi-delta.neu { color: var(--text3); }
+
+    /* Chart card */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-title {
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--text2);
+      margin-bottom: 0.8rem;
+    }
+    .chart-wrap { position: relative; }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+    .data-table th {
+      text-align: left;
+      font-size: 0.65rem; font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.5rem 0.7rem;
+      border-bottom: 1px solid var(--border2);
+    }
+    .data-table td {
+      padding: 0.5rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .data-table .highlight { color: var(--text); font-weight: 600; }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* CTA overlay */
+    .cta-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .cta-overlay.show { display: flex; }
+    .cta-box {
+      background: var(--surface);
+      border: 1.5px solid var(--primary);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+    }
+    .cta-box h2 {
+      font-size: 1.4rem; font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .cta-box h2 span { color: var(--primary-light); }
+    .cta-box p {
+      color: var(--text2); font-size: 0.9rem;
+      margin-bottom: 1.5rem; line-height: 1.5;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.9rem; font-weight: 600;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none; cursor: pointer;
+      font-family: inherit;
+    }
+    .cta-btn:hover {
+      background: var(--primary-light);
+      box-shadow: 0 0 30px rgba(13,124,102,0.3);
+    }
+    .cta-dismiss {
+      display: block;
+      margin-top: 1rem;
+      background: none; border: none;
+      color: var(--text3); font-size: 0.8rem;
+      cursor: pointer; font-family: inherit;
+    }
+
+    /* Date range */
+    .date-range {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem; color: var(--text2);
+      margin-bottom: 1rem;
+    }
+    .date-range svg { width: 14px; height: 14px; color: var(--primary-light); }
+
+    @media (max-width: 700px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .container { padding: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/demo.html" class="header-logo">
+    <img src="logo-solo.png" alt="Cumplido">
+  </a>
+  <div class="header-right">
+    <span class="demo-badge">Demo</span>
+    <span class="header-user">La Taverna</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('ventas',this)">Ventas</button>
+  <button class="tab-btn" onclick="showTab('costes',this)">Costes</button>
+  <button class="tab-btn" onclick="showTab('compras',this)">Compras</button>
+  <button class="tab-btn" onclick="showTab('rrhh',this)">RRHH</button>
+</nav>
+
+<main class="container">
+
+  <!-- VENTAS -->
+  <div id="ventas" class="tab-panel active">
+    <div class="date-range">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Enero 2026 — Julio 2026
+    </div>
+    <div class="kpi-row">
+      <div class="kpi kpi-accent">
+        <div class="kpi-label">Ingresos s/IVA</div>
+        <div class="kpi-value">€487.2K</div>
+        <div class="kpi-delta pos">+12.3% vs anterior</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Total comensales</div>
+        <div class="kpi-value">18.420</div>
+        <div class="kpi-delta pos">+8.1%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ticket medio</div>
+        <div class="kpi-value">€26.45</div>
+        <div class="kpi-delta pos">+3.8%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Mejor sala</div>
+        <div class="kpi-value">Terraza</div>
+        <div class="kpi-delta neu">42% del total</div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Ingresos mensuales (s/IVA)</div>
+      <div class="chart-wrap"><canvas id="cVentas"></canvas></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Ventas por sala</div>
+        <div class="chart-wrap"><canvas id="cSalas"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Mix comida vs bebida</div>
+        <div class="chart-wrap"><canvas id="cMix"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Ticket medio mensual</div>
+      <div class="chart-wrap"><canvas id="cTicket"></canvas></div>
+    </div>
+  </div>
+
+  <!-- COSTES -->
+  <div id="costes" class="tab-panel">
+    <div class="date-range">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Enero 2026 — Julio 2026
+    </div>
+    <div class="kpi-row">
+      <div class="kpi kpi-accent">
+        <div class="kpi-label">Total costes</div>
+        <div class="kpi-value">€371.8K</div>
+        <div class="kpi-delta neg">+4.2% vs forecast</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">% Coste s/ventas</div>
+        <div class="kpi-value">76.3%</div>
+        <div class="kpi-delta neu">Obj: 75%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">% Food cost</div>
+        <div class="kpi-value">31.2%</div>
+        <div class="kpi-delta neg">Obj: 30%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">% Beverage cost</div>
+        <div class="kpi-value">22.8%</div>
+        <div class="kpi-delta pos">Obj: 25%</div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Costes por partida</div>
+      <div class="chart-wrap"><canvas id="cCostBar"></canvas></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Forecast vs Real</div>
+        <div class="chart-wrap"><canvas id="cCostFcast"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Fijos vs Variables</div>
+        <div class="chart-wrap"><canvas id="cFixVar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Desglose de costes</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Partida</th><th class="num">Importe</th><th class="num">% s/Ventas</th><th class="num">vs Forecast</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="highlight">RRHH</td><td class="num">€148.7K</td><td class="num">30.5%</td><td class="num" style="color:var(--red)">+2.1%</td></tr>
+          <tr><td class="highlight">Compras A&B</td><td class="num">€126.4K</td><td class="num">25.9%</td><td class="num" style="color:var(--red)">+1.8%</td></tr>
+          <tr><td>Funcionamiento</td><td class="num">€43.2K</td><td class="num">8.9%</td><td class="num" style="color:var(--green)">-0.5%</td></tr>
+          <tr><td>Marketing</td><td class="num">€18.9K</td><td class="num">3.9%</td><td class="num" style="color:var(--green)">-1.2%</td></tr>
+          <tr><td>Limpieza</td><td class="num">€14.6K</td><td class="num">3.0%</td><td class="num" style="color:var(--amber)">+0.3%</td></tr>
+          <tr><td>Consumos</td><td class="num">€12.1K</td><td class="num">2.5%</td><td class="num" style="color:var(--green)">-0.2%</td></tr>
+          <tr><td>Mantenimiento</td><td class="num">€5.8K</td><td class="num">1.2%</td><td class="num" style="color:var(--green)">0%</td></tr>
+          <tr><td>Inversiones</td><td class="num">€2.1K</td><td class="num">0.4%</td><td class="num" style="color:var(--green)">-0.8%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- COMPRAS -->
+  <div id="compras" class="tab-panel">
+    <div class="date-range">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Enero 2026 — Julio 2026
+    </div>
+    <div class="kpi-row">
+      <div class="kpi kpi-accent">
+        <div class="kpi-label">Total compras s/IVA</div>
+        <div class="kpi-value">€126.4K</div>
+        <div class="kpi-delta neg">+5.1% vs anterior</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Importe pendiente</div>
+        <div class="kpi-value">€8.3K</div>
+        <div class="kpi-delta neu">12 facturas</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Nº Facturas</div>
+        <div class="kpi-value">347</div>
+        <div class="kpi-delta neu">49.6/mes</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Top proveedor</div>
+        <div class="kpi-value">Makro</div>
+        <div class="kpi-delta neu">18.2% del total</div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Compras mensuales (s/IVA)</div>
+      <div class="chart-wrap"><canvas id="cCompMes"></canvas></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Top proveedores</div>
+        <div class="chart-wrap"><canvas id="cProv"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Compras por categoría</div>
+        <div class="chart-wrap"><canvas id="cCompCat"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Detalle por proveedor</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Proveedor</th><th class="num">Importe</th><th class="num">% Total</th><th class="num">Facturas</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="highlight">Makro</td><td class="num">€23.0K</td><td class="num">18.2%</td><td class="num">62</td></tr>
+          <tr><td class="highlight">Distribuciones García</td><td class="num">€19.4K</td><td class="num">15.3%</td><td class="num">48</td></tr>
+          <tr><td>Coca-Cola EP</td><td class="num">€14.2K</td><td class="num">11.2%</td><td class="num">28</td></tr>
+          <tr><td>Pescados Navarro</td><td class="num">€12.8K</td><td class="num">10.1%</td><td class="num">45</td></tr>
+          <tr><td>Carnes Selectas SL</td><td class="num">€11.5K</td><td class="num">9.1%</td><td class="num">38</td></tr>
+          <tr><td>Frutas del Levante</td><td class="num">€9.7K</td><td class="num">7.7%</td><td class="num">32</td></tr>
+          <tr><td>Bodegas Rioja</td><td class="num">€8.9K</td><td class="num">7.0%</td><td class="num">18</td></tr>
+          <tr><td>Otros (21)</td><td class="num">€26.9K</td><td class="num">21.3%</td><td class="num">76</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RRHH -->
+  <div id="rrhh" class="tab-panel">
+    <div class="date-range">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Enero 2026 — Julio 2026
+    </div>
+    <div class="kpi-row">
+      <div class="kpi kpi-accent">
+        <div class="kpi-label">Coste empresa total</div>
+        <div class="kpi-value">€148.7K</div>
+        <div class="kpi-delta neg">+2.1% vs forecast</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">% RRHH s/ventas</div>
+        <div class="kpi-value">30.5%</div>
+        <div class="kpi-delta pos">Obj: 32%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Mayor área</div>
+        <div class="kpi-value">Cocina</div>
+        <div class="kpi-delta neu">41% del total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Finiquitos</div>
+        <div class="kpi-value">€3.2K</div>
+        <div class="kpi-delta neu">2 empleados</div>
+      </div>
+    </div>
+
+    <div class="chart-card full">
+      <div class="chart-title">Nómina mensual</div>
+      <div class="chart-wrap"><canvas id="cNomMes"></canvas></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Coste por área</div>
+        <div class="chart-wrap"><canvas id="cNomArea"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">% RRHH sobre ventas</div>
+        <div class="chart-wrap"><canvas id="cHRPct"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- CTA Overlay -->
+<div class="cta-overlay" id="ctaOverlay">
+  <div class="cta-box">
+    <h2>¿Quieres ver <span>tu restaurante</span> aquí?</h2>
+    <p>Conecta tus datos de Revo, Agora, GStock o Tspoon y ten tu dashboard financiero listo en minutos.</p>
+    <a href="https://cal.eu/felipe-suarez-vcwtg0/15min" target="_blank" class="cta-btn">Agendar demo personalizada</a>
+    <button class="cta-dismiss" onclick="dismissCta()">Seguir explorando</button>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul'];
+const COLORS = {
+  primary: '#0D7C66',
+  primaryLight: '#0fa37f',
+  green: '#22c997',
+  red: '#ff5c7a',
+  amber: '#ffb547',
+  blue: '#4da6ff',
+  purple: '#b07fff',
+  gray: '#55556a'
+};
+const PALETTE = [COLORS.primary, COLORS.green, COLORS.amber, COLORS.blue, COLORS.purple, COLORS.red, COLORS.gray];
+const tc = '#55556a', gc = 'rgba(255,255,255,0.05)';
+
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.color = tc;
+
+function baseOpts(euro) {
+  return {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e1e27',
+        titleColor: '#f0f0f5',
+        bodyColor: '#8a8d92',
+        borderColor: 'rgba(255,255,255,0.12)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        padding: 10,
+        callbacks: euro ? {
+          label: ctx => '€' + ctx.parsed.y.toLocaleString('es-ES')
+        } : {}
+      }
+    },
+    scales: {
+      x: { grid: { color: gc }, ticks: { color: tc, font: { size: 11 } } },
+      y: {
+        grid: { color: gc },
+        ticks: {
+          color: tc, font: { size: 11 },
+          callback: v => euro ? '€' + (v >= 1000 ? (v/1000).toFixed(0) + 'K' : v) : v
+        }
+      }
+    }
+  };
+}
+
+function donutOpts() {
+  return {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { color: '#8a8d92', font: { size: 11 }, padding: 12, usePointStyle: true, pointStyleWidth: 8 }
+      },
+      tooltip: {
+        backgroundColor: '#1e1e27', titleColor: '#f0f0f5', bodyColor: '#8a8d92',
+        borderColor: 'rgba(255,255,255,0.12)', borderWidth: 1, cornerRadius: 8
+      }
+    }
+  };
+}
+
+// VENTAS
+new Chart('cVentas', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      data: [62400, 58100, 71200, 68500, 73800, 78200, 75000],
+      backgroundColor: COLORS.primary,
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: baseOpts(true)
+});
+
+new Chart('cSalas', {
+  type: 'doughnut',
+  data: {
+    labels: ['Terraza', 'Sala interior', 'Barra'],
+    datasets: [{ data: [42, 38, 20], backgroundColor: [COLORS.primary, COLORS.green, COLORS.amber], borderWidth: 3, borderColor: '#131518' }]
+  },
+  options: donutOpts()
+});
+
+new Chart('cMix', {
+  type: 'doughnut',
+  data: {
+    labels: ['Comida', 'Bebida'],
+    datasets: [{ data: [63, 37], backgroundColor: [COLORS.primaryLight, COLORS.amber], borderWidth: 3, borderColor: '#131518' }]
+  },
+  options: donutOpts()
+});
+
+new Chart('cTicket', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      data: [24.80, 25.10, 26.30, 25.90, 27.20, 27.80, 28.05],
+      borderColor: COLORS.primaryLight,
+      backgroundColor: 'rgba(15,163,127,0.1)',
+      fill: true, tension: 0.35, pointRadius: 4, borderWidth: 2.5
+    }]
+  },
+  options: baseOpts(true)
+});
+
+// COSTES
+new Chart('cCostBar', {
+  type: 'bar',
+  data: {
+    labels: ['RRHH', 'Compras A&B', 'Funcionam.', 'Marketing', 'Limpieza', 'Consumos', 'Mantenim.', 'Inversiones'],
+    datasets: [{
+      data: [148700, 126400, 43200, 18900, 14600, 12100, 5800, 2100],
+      backgroundColor: PALETTE,
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: baseOpts(true)
+});
+
+new Chart('cCostFcast', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Forecast', data: [49500, 48200, 53800, 52100, 54900, 56200, 55000], backgroundColor: 'rgba(13,124,102,0.3)', borderRadius: 5, borderSkipped: false },
+      { label: 'Real', data: [51200, 49800, 54100, 53800, 56200, 57900, 56800], backgroundColor: COLORS.primary, borderRadius: 5, borderSkipped: false }
+    ]
+  },
+  options: {
+    ...baseOpts(true),
+    plugins: {
+      ...baseOpts(true).plugins,
+      legend: { display: true, labels: { color: '#8a8d92', font: { size: 11 }, usePointStyle: true, pointStyleWidth: 8 } }
+    }
+  }
+});
+
+new Chart('cFixVar', {
+  type: 'doughnut',
+  data: {
+    labels: ['Fijos', 'Variables'],
+    datasets: [{ data: [58, 42], backgroundColor: [COLORS.blue, COLORS.amber], borderWidth: 3, borderColor: '#131518' }]
+  },
+  options: donutOpts()
+});
+
+// COMPRAS
+new Chart('cCompMes', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      data: [16200, 15800, 19100, 17400, 18900, 20500, 18500],
+      backgroundColor: COLORS.green,
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: baseOpts(true)
+});
+
+new Chart('cProv', {
+  type: 'bar',
+  data: {
+    labels: ['Makro', 'Dist. García', 'Coca-Cola', 'P. Navarro', 'Carnes SL', 'Frutas Lev.', 'Bod. Rioja'],
+    datasets: [{
+      data: [23000, 19400, 14200, 12800, 11500, 9700, 8900],
+      backgroundColor: PALETTE,
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: { ...baseOpts(true), indexAxis: 'y' }
+});
+
+new Chart('cCompCat', {
+  type: 'doughnut',
+  data: {
+    labels: ['Alimentación', 'Bebidas', 'Limpieza', 'Desechables', 'Otros'],
+    datasets: [{ data: [45, 28, 12, 9, 6], backgroundColor: [COLORS.primary, COLORS.amber, COLORS.blue, COLORS.purple, COLORS.gray], borderWidth: 3, borderColor: '#131518' }]
+  },
+  options: donutOpts()
+});
+
+// RRHH
+new Chart('cNomMes', {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [{
+      data: [20100, 19800, 21500, 20900, 22100, 22800, 21500],
+      backgroundColor: COLORS.blue,
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: baseOpts(true)
+});
+
+new Chart('cNomArea', {
+  type: 'doughnut',
+  data: {
+    labels: ['Cocina', 'Sala', 'Barra', 'Dirección', 'Limpieza'],
+    datasets: [{ data: [41, 28, 15, 10, 6], backgroundColor: [COLORS.primary, COLORS.green, COLORS.amber, COLORS.blue, COLORS.purple], borderWidth: 3, borderColor: '#131518' }]
+  },
+  options: donutOpts()
+});
+
+new Chart('cHRPct', {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '% RRHH', data: [32.2, 34.1, 30.2, 30.5, 29.9, 29.2, 28.7], borderColor: COLORS.blue, tension: 0.35, pointRadius: 4, borderWidth: 2.5, fill: false },
+      { label: 'Objetivo', data: [32, 32, 32, 32, 32, 32, 32], borderColor: COLORS.red, borderDash: [5, 5], pointRadius: 0, borderWidth: 1.5, fill: false }
+    ]
+  },
+  options: {
+    ...baseOpts(false),
+    plugins: {
+      ...baseOpts(false).plugins,
+      legend: { display: true, labels: { color: '#8a8d92', font: { size: 11 }, usePointStyle: true, pointStyleWidth: 8 } }
+    },
+    scales: {
+      ...baseOpts(false).scales,
+      y: { ...baseOpts(false).scales.y, ticks: { ...baseOpts(false).scales.y.ticks, callback: v => v + '%' } }
+    }
+  }
+});
+
+// Tab switching
+let tabsVisited = new Set(['ventas']);
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  tabsVisited.add(id);
+  if (tabsVisited.size >= 3) {
+    setTimeout(() => { document.getElementById('ctaOverlay').classList.add('show'); }, 1500);
+  }
+}
+
+function dismissCta() {
+  document.getElementById('ctaOverlay').classList.remove('show');
+}
+</script>
+
+</body>
+</html>
