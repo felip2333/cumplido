@@ -130,16 +130,17 @@
     .chart-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 16px;
+      margin-bottom: 20px;
     }
     .chart-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1rem;
+      margin-bottom: 0;
     }
-    .chart-card.full { grid-column: 1 / -1; }
+    .chart-card.full { grid-column: 1 / -1; margin-bottom: 20px; }
     .chart-title {
       font-size: 0.75rem; font-weight: 600;
       color: var(--text2);
@@ -220,7 +221,7 @@
     }
     .cta-dismiss {
       display: block;
-      margin-top: 1rem;
+      margin: 1rem auto 0;
       background: none; border: none;
       color: var(--text3); font-size: 0.8rem;
       cursor: pointer; font-family: inherit;
@@ -237,6 +238,81 @@
       margin-bottom: 1rem;
     }
     .date-range svg { width: 14px; height: 14px; color: var(--primary-light); }
+
+    /* Personalización tab */
+    .custom-hero {
+      text-align: center;
+      padding: 2rem 0 1.5rem;
+    }
+    .custom-hero h2 {
+      font-size: 1.4rem; font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+    .custom-hero p {
+      color: var(--text2); font-size: 0.9rem;
+      max-width: 500px; margin: 0 auto;
+    }
+    .custom-section {
+      margin-bottom: 2rem;
+    }
+    .custom-section-title {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.8rem;
+    }
+    .custom-section-title svg { width: 16px; height: 16px; }
+    .custom-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .custom-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+    }
+    .custom-card.included { border-color: rgba(13,124,102,0.3); }
+    .custom-card.premium { border-color: var(--border); }
+    .custom-card-icon {
+      width: 40px; height: 40px;
+      background: var(--primary-tint);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.8rem;
+    }
+    .custom-card-icon svg { width: 20px; height: 20px; color: var(--primary-light); }
+    .custom-card-icon.premium-icon {
+      background: rgba(176,127,255,0.1);
+    }
+    .custom-card-icon.premium-icon svg { color: var(--purple); }
+    .custom-card h3 {
+      font-size: 0.9rem; font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    .custom-card p {
+      font-size: 0.78rem; color: var(--text2);
+      line-height: 1.5; margin-bottom: 0.6rem;
+    }
+    .custom-systems {
+      font-size: 0.68rem; font-weight: 600;
+      color: var(--text3);
+      background: var(--surface2);
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+    }
+    .custom-cta {
+      text-align: center;
+      padding: 2rem 0;
+    }
+    .custom-cta p {
+      color: var(--text2); font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
 
     @media (max-width: 700px) {
       .chart-grid { grid-template-columns: 1fr; }
@@ -259,9 +335,8 @@
 
 <nav class="tabs">
   <button class="tab-btn active" onclick="showTab('ventas',this)">Ventas</button>
-  <button class="tab-btn" onclick="showTab('costes',this)">Costes</button>
   <button class="tab-btn" onclick="showTab('compras',this)">Compras</button>
-  <button class="tab-btn" onclick="showTab('rrhh',this)">RRHH</button>
+  <button class="tab-btn" onclick="showTab('personaliza',this)">Personalización</button>
 </nav>
 
 <main class="container">
@@ -317,71 +392,6 @@
     </div>
   </div>
 
-  <!-- COSTES -->
-  <div id="costes" class="tab-panel">
-    <div class="date-range">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Enero 2026 — Julio 2026
-    </div>
-    <div class="kpi-row">
-      <div class="kpi kpi-accent">
-        <div class="kpi-label">Total costes</div>
-        <div class="kpi-value">€371.8K</div>
-        <div class="kpi-delta neg">+4.2% vs forecast</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">% Coste s/ventas</div>
-        <div class="kpi-value">76.3%</div>
-        <div class="kpi-delta neu">Obj: 75%</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">% Food cost</div>
-        <div class="kpi-value">31.2%</div>
-        <div class="kpi-delta neg">Obj: 30%</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">% Beverage cost</div>
-        <div class="kpi-value">22.8%</div>
-        <div class="kpi-delta pos">Obj: 25%</div>
-      </div>
-    </div>
-
-    <div class="chart-card full">
-      <div class="chart-title">Costes por partida</div>
-      <div class="chart-wrap"><canvas id="cCostBar"></canvas></div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-title">Forecast vs Real</div>
-        <div class="chart-wrap"><canvas id="cCostFcast"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Fijos vs Variables</div>
-        <div class="chart-wrap"><canvas id="cFixVar"></canvas></div>
-      </div>
-    </div>
-
-    <div class="chart-card full">
-      <div class="chart-title">Desglose de costes</div>
-      <table class="data-table">
-        <thead>
-          <tr><th>Partida</th><th class="num">Importe</th><th class="num">% s/Ventas</th><th class="num">vs Forecast</th></tr>
-        </thead>
-        <tbody>
-          <tr><td class="highlight">RRHH</td><td class="num">€148.7K</td><td class="num">30.5%</td><td class="num" style="color:var(--red)">+2.1%</td></tr>
-          <tr><td class="highlight">Compras A&B</td><td class="num">€126.4K</td><td class="num">25.9%</td><td class="num" style="color:var(--red)">+1.8%</td></tr>
-          <tr><td>Funcionamiento</td><td class="num">€43.2K</td><td class="num">8.9%</td><td class="num" style="color:var(--green)">-0.5%</td></tr>
-          <tr><td>Marketing</td><td class="num">€18.9K</td><td class="num">3.9%</td><td class="num" style="color:var(--green)">-1.2%</td></tr>
-          <tr><td>Limpieza</td><td class="num">€14.6K</td><td class="num">3.0%</td><td class="num" style="color:var(--amber)">+0.3%</td></tr>
-          <tr><td>Consumos</td><td class="num">€12.1K</td><td class="num">2.5%</td><td class="num" style="color:var(--green)">-0.2%</td></tr>
-          <tr><td>Mantenimiento</td><td class="num">€5.8K</td><td class="num">1.2%</td><td class="num" style="color:var(--green)">0%</td></tr>
-          <tr><td>Inversiones</td><td class="num">€2.1K</td><td class="num">0.4%</td><td class="num" style="color:var(--green)">-0.8%</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <!-- COMPRAS -->
   <div id="compras" class="tab-panel">
     <div class="date-range">
@@ -408,6 +418,19 @@
         <div class="kpi-label">Top proveedor</div>
         <div class="kpi-value">Makro</div>
         <div class="kpi-delta neu">18.2% del total</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="kpi" style="border-top: 2px solid var(--amber);">
+        <div class="kpi-label">% Food cost</div>
+        <div class="kpi-value">31.2%</div>
+        <div class="kpi-delta neg">Obj: 30%</div>
+      </div>
+      <div class="kpi" style="border-top: 2px solid var(--blue);">
+        <div class="kpi-label">% Beverage cost</div>
+        <div class="kpi-value">22.8%</div>
+        <div class="kpi-delta pos">Obj: 25%</div>
       </div>
     </div>
 
@@ -447,49 +470,74 @@
     </div>
   </div>
 
-  <!-- RRHH -->
-  <div id="rrhh" class="tab-panel">
-    <div class="date-range">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Enero 2026 — Julio 2026
+  <!-- PERSONALIZACIÓN -->
+  <div id="personaliza" class="tab-panel">
+    <div class="custom-hero">
+      <h2>Personaliza tu dashboard</h2>
+      <p>Conecta cualquier sistema o sube tus datos para tener una visión financiera completa de tu restaurante.</p>
     </div>
-    <div class="kpi-row">
-      <div class="kpi kpi-accent">
-        <div class="kpi-label">Coste empresa total</div>
-        <div class="kpi-value">€148.7K</div>
-        <div class="kpi-delta neg">+2.1% vs forecast</div>
+
+    <div class="custom-section">
+      <div class="custom-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
+        Incluido en tu plan
       </div>
-      <div class="kpi">
-        <div class="kpi-label">% RRHH s/ventas</div>
-        <div class="kpi-value">30.5%</div>
-        <div class="kpi-delta pos">Obj: 32%</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Mayor área</div>
-        <div class="kpi-value">Cocina</div>
-        <div class="kpi-delta neu">41% del total</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Finiquitos</div>
-        <div class="kpi-value">€3.2K</div>
-        <div class="kpi-delta neu">2 empleados</div>
+      <div class="custom-grid">
+        <div class="custom-card included">
+          <div class="custom-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="18" rx="3"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          </div>
+          <h3>Ventas (TPV/POS)</h3>
+          <p>Ingresos, ticket medio, comensales, mix comida/bebida, ventas por sala</p>
+          <div class="custom-systems">Revo, Agora y otros POS</div>
+        </div>
+        <div class="custom-card included">
+          <div class="custom-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          </div>
+          <h3>Compras e inventario</h3>
+          <p>Facturas, proveedores, food cost, beverage cost, categorías de compra</p>
+          <div class="custom-systems">Tspoon, GStock y otros</div>
+        </div>
       </div>
     </div>
 
-    <div class="chart-card full">
-      <div class="chart-title">Nómina mensual</div>
-      <div class="chart-wrap"><canvas id="cNomMes"></canvas></div>
+    <div class="custom-section">
+      <div class="custom-section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Personalización premium
+      </div>
+      <div class="custom-grid">
+        <div class="custom-card premium">
+          <div class="custom-card-icon premium-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3>RRHH y nóminas</h3>
+          <p>Coste de personal por área, % sobre ventas, nóminas mensuales, finiquitos</p>
+          <div class="custom-systems">Excel, software de nóminas u otros</div>
+        </div>
+        <div class="custom-card premium">
+          <div class="custom-card-icon premium-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <h3>Otros costes y facturas</h3>
+          <p>Funcionamiento, marketing, limpieza, consumos, mantenimiento, inversiones</p>
+          <div class="custom-systems">Excel, ERP o sistema de facturación</div>
+        </div>
+        <div class="custom-card premium">
+          <div class="custom-card-icon premium-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          </div>
+          <h3>Dashboard a medida</h3>
+          <p>Conectamos cualquier otro sistema POS, de compras o de gestión que utilices</p>
+          <div class="custom-systems">Cualquier sistema con exportación de datos</div>
+        </div>
+      </div>
     </div>
 
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-title">Coste por área</div>
-        <div class="chart-wrap"><canvas id="cNomArea"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">% RRHH sobre ventas</div>
-        <div class="chart-wrap"><canvas id="cHRPct"></canvas></div>
-      </div>
+    <div class="custom-cta">
+      <p>Cuéntanos qué sistemas usas y te preparamos una propuesta personalizada</p>
+      <a href="https://cal.eu/felipe-suarez-vcwtg0/15min" target="_blank" class="cta-btn">Hablar con nosotros</a>
     </div>
   </div>
 
@@ -499,7 +547,7 @@
 <div class="cta-overlay" id="ctaOverlay">
   <div class="cta-box">
     <h2>¿Quieres ver <span>tu restaurante</span> aquí?</h2>
-    <p>Conecta tus datos de Revo, Agora, GStock o Tspoon y ten tu dashboard financiero listo en minutos.</p>
+    <p>Conecta tus datos de Revo, Agora, Tspoon o GStock y ten tu dashboard de ventas y compras listo en minutos. Personaliza con RRHH, costes y más.</p>
     <a href="https://cal.eu/felipe-suarez-vcwtg0/15min" target="_blank" class="cta-btn">Agendar demo personalizada</a>
     <button class="cta-dismiss" onclick="dismissCta()">Seguir explorando</button>
   </div>
@@ -618,47 +666,6 @@ new Chart('cTicket', {
   options: baseOpts(true)
 });
 
-// COSTES
-new Chart('cCostBar', {
-  type: 'bar',
-  data: {
-    labels: ['RRHH', 'Compras A&B', 'Funcionam.', 'Marketing', 'Limpieza', 'Consumos', 'Mantenim.', 'Inversiones'],
-    datasets: [{
-      data: [148700, 126400, 43200, 18900, 14600, 12100, 5800, 2100],
-      backgroundColor: PALETTE,
-      borderRadius: 5, borderSkipped: false
-    }]
-  },
-  options: baseOpts(true)
-});
-
-new Chart('cCostFcast', {
-  type: 'bar',
-  data: {
-    labels: MONTHS,
-    datasets: [
-      { label: 'Forecast', data: [49500, 48200, 53800, 52100, 54900, 56200, 55000], backgroundColor: 'rgba(13,124,102,0.3)', borderRadius: 5, borderSkipped: false },
-      { label: 'Real', data: [51200, 49800, 54100, 53800, 56200, 57900, 56800], backgroundColor: COLORS.primary, borderRadius: 5, borderSkipped: false }
-    ]
-  },
-  options: {
-    ...baseOpts(true),
-    plugins: {
-      ...baseOpts(true).plugins,
-      legend: { display: true, labels: { color: '#8a8d92', font: { size: 11 }, usePointStyle: true, pointStyleWidth: 8 } }
-    }
-  }
-});
-
-new Chart('cFixVar', {
-  type: 'doughnut',
-  data: {
-    labels: ['Fijos', 'Variables'],
-    datasets: [{ data: [58, 42], backgroundColor: [COLORS.blue, COLORS.amber], borderWidth: 3, borderColor: '#131518' }]
-  },
-  options: donutOpts()
-});
-
 // COMPRAS
 new Chart('cCompMes', {
   type: 'bar',
@@ -695,51 +702,6 @@ new Chart('cCompCat', {
   options: donutOpts()
 });
 
-// RRHH
-new Chart('cNomMes', {
-  type: 'bar',
-  data: {
-    labels: MONTHS,
-    datasets: [{
-      data: [20100, 19800, 21500, 20900, 22100, 22800, 21500],
-      backgroundColor: COLORS.blue,
-      borderRadius: 5, borderSkipped: false
-    }]
-  },
-  options: baseOpts(true)
-});
-
-new Chart('cNomArea', {
-  type: 'doughnut',
-  data: {
-    labels: ['Cocina', 'Sala', 'Barra', 'Dirección', 'Limpieza'],
-    datasets: [{ data: [41, 28, 15, 10, 6], backgroundColor: [COLORS.primary, COLORS.green, COLORS.amber, COLORS.blue, COLORS.purple], borderWidth: 3, borderColor: '#131518' }]
-  },
-  options: donutOpts()
-});
-
-new Chart('cHRPct', {
-  type: 'line',
-  data: {
-    labels: MONTHS,
-    datasets: [
-      { label: '% RRHH', data: [32.2, 34.1, 30.2, 30.5, 29.9, 29.2, 28.7], borderColor: COLORS.blue, tension: 0.35, pointRadius: 4, borderWidth: 2.5, fill: false },
-      { label: 'Objetivo', data: [32, 32, 32, 32, 32, 32, 32], borderColor: COLORS.red, borderDash: [5, 5], pointRadius: 0, borderWidth: 1.5, fill: false }
-    ]
-  },
-  options: {
-    ...baseOpts(false),
-    plugins: {
-      ...baseOpts(false).plugins,
-      legend: { display: true, labels: { color: '#8a8d92', font: { size: 11 }, usePointStyle: true, pointStyleWidth: 8 } }
-    },
-    scales: {
-      ...baseOpts(false).scales,
-      y: { ...baseOpts(false).scales.y, ticks: { ...baseOpts(false).scales.y.ticks, callback: v => v + '%' } }
-    }
-  }
-});
-
 // Tab switching
 let tabsVisited = new Set(['ventas']);
 function showTab(id, btn) {
@@ -748,7 +710,7 @@ function showTab(id, btn) {
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   tabsVisited.add(id);
-  if (tabsVisited.size >= 3) {
+  if (tabsVisited.has('ventas') && tabsVisited.has('compras') && tabsVisited.size >= 3) {
     setTimeout(() => { document.getElementById('ctaOverlay').classList.add('show'); }, 1500);
   }
 }
